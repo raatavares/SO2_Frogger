@@ -1,0 +1,4 @@
+﻿  server.c
+C:\Users\Danie\Desktop\SO2_Frogger\Servidor\server.c(22,42): warning C4133: 'função': tipos incompatíveis - de 'char [10]' para 'LPCWSTR'
+C:\Users\Danie\Desktop\SO2_Frogger\Servidor\server.c(29,27): warning C4477: 'wscanf_s': a cadeia de formato '%d' requer um argumento do tipo 'int *', mas um argumento variadic 1 tem o tipo 'int'
+  Servidor.vcxproj -> C:\Users\Danie\Desktop\SO2_Frogger\Servidor\x64\Debug\Servidor.exe
