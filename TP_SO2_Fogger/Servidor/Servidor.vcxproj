@@ -127,7 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Servidor.cpp" />
+    <ClCompile Include="Servidor.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Servidor.h" />
