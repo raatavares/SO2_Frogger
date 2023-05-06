@@ -61,17 +61,76 @@ DWORD WINAPI ThreadRow(LPVOID param) {
     WaitForSingleObject(dados->hEvent, INFINITE);
 
     _tprintf(TEXT("\n[Sou a thread %d]"), dados->faixaNumero);
-    if (dados->faixaNumero%2==0){
+    switch (dados->faixaNumero){
+    case 1:
         dados->board[dados->faixaNumero][10] = TEXT('<');
         dados->board[dados->faixaNumero][2] = TEXT('<');
-        dados->board[dados->faixaNumero][17] = TEXT('<');
-    }
-    else
-    {
-        dados->board[dados->faixaNumero][13] = TEXT('>');
-        dados->board[dados->faixaNumero][5] = TEXT('>');
+        break;
+    case 2:
+        dados->board[dados->faixaNumero][15] = TEXT('>');
+        dados->board[dados->faixaNumero][6] = TEXT('>');
+        break;
+    case 3:
+        dados->board[dados->faixaNumero][11] = TEXT('<');
+        dados->board[dados->faixaNumero][3] = TEXT('<');
+        break;
+    case 4:
         dados->board[dados->faixaNumero][19] = TEXT('>');
+        dados->board[dados->faixaNumero][4] = TEXT('>');
+        break;
+    case 5:
+        dados->board[dados->faixaNumero][16] = TEXT('<');
+        dados->board[dados->faixaNumero][8] = TEXT('<');
+        break;
+    case 6:
+        dados->board[dados->faixaNumero][9] = TEXT('>');
+        dados->board[dados->faixaNumero][1] = TEXT('>');
+        break;
+    case 7:
+        dados->board[dados->faixaNumero][12] = TEXT('<');
+        dados->board[dados->faixaNumero][3] = TEXT('<');
+        break;
+    case 8:
+        dados->board[dados->faixaNumero][10] = TEXT('>');
+        dados->board[dados->faixaNumero][2] = TEXT('>');
+        dados->board[dados->faixaNumero][17] = TEXT('>');
+        break;
     }
+    do {
+        for (int i = 0; i < dados->cols; i++){
+            //WaitForSingleObject(dados->hMutex, INFINITE);
+
+            if (dados->board[dados->faixaNumero][i] == TEXT('>')) {
+                dados->board[dados->faixaNumero][i] = TEXT(' ');
+                if (i == dados->cols - 1)   dados->board[dados->faixaNumero][0] = TEXT('>');
+                else   dados->board[dados->faixaNumero][i + 1] = TEXT('>');
+                
+
+
+            }
+            else if (dados->board[dados->faixaNumero][i] == TEXT('<')) {
+                dados->board[dados->faixaNumero][i] = TEXT(' ');
+                if (i == 0)   dados->board[dados->faixaNumero][dados->cols - 1] = TEXT('<');
+                else   dados->board[dados->faixaNumero][i - 1] = TEXT('<');
+
+                
+
+
+            }
+
+            //ReleaseMutex(dados->hMutex);
+        }
+        Sleep(dados->faixaVelocidade);
+
+
+    } while (1);
+    
+
+    
+
+    
+
+    
     return 0;
 
 }
@@ -81,7 +140,7 @@ int _tmain(int argc, TCHAR* argv[]) {
     HKEY chave;
     DWORD resultado;
     int varAdd = 0, numFaixas;
-    HANDLE hOneServer;
+    HANDLE hOneServer,hMutex;
     HANDLE hGlobalEvent;
     int cols = 20, velocidade,rows;
     TCHAR** areaJogo;
@@ -145,6 +204,11 @@ int _tmain(int argc, TCHAR* argv[]) {
         _tprintf(TEXT("Erro a criar o evento\n"));
         return -1;
     }
+    hMutex = CreateMutex(NULL, FALSE, NULL,"abc");
+    if (hMutex == NULL) {
+        _tprintf(TEXT("Erro a criar mutex.\n"));
+        return 1;
+    }
 
     areaJogo = createBoard(numFaixas, cols);
     
@@ -152,6 +216,8 @@ int _tmain(int argc, TCHAR* argv[]) {
     if (!putSapo(areaJogo, numFaixas, cols)) _tprintf(TEXT("\nNao ha espaço "));
 
     for (int i = 0;i < numFaixas;i++) {
+        dados[i].hMutex = hMutex;
+        dados[i].faixaVelocidade = velocidade;
         dados[i].hEvent = hGlobalEvent;
         dados[i].board = areaJogo;
         dados[i].rows = rows;
@@ -163,13 +229,13 @@ int _tmain(int argc, TCHAR* argv[]) {
     Sleep(1000);
     SetEvent(hGlobalEvent);
     
-    //system("cls");
-
     do {
-        show(areaJogo, numFaixas, cols);
-        Sleep(500);
+        //WaitForSingleObject(hMutex, INFINITE);
         system("cls");
-
+        show(areaJogo, numFaixas, cols);
+        //ReleaseMutex(hMutex);
+        Sleep(velocidade);
+        
     } while (1);
 
 

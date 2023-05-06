@@ -10,10 +10,10 @@
 #define MAXFAIXAS 8
 
 typedef struct {
-	HANDLE hEvent;
+	HANDLE hEvent,hMutex;
 	TCHAR** board;
 	int rows, cols;
-	int faixaNumero;
+	int faixaNumero,faixaVelocidade;
 } data;
 
 BOOL putSapo(TCHAR** board, int numFaixas, int cols);
