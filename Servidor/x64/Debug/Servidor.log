@@ -1,0 +1,9 @@
+﻿  server.c
+C:\Users\Danie\Desktop\SO2_Frogger\Servidor\server.c(32,42): warning C4133: 'função': tipos incompatíveis - de 'char [10]' para 'LPCWSTR'
+C:\Users\Danie\Desktop\SO2_Frogger\Servidor\server.c(14,21): warning C4101: 'numFaixas': variável local não referenciada
+C:\Users\Danie\Desktop\SO2_Frogger\Servidor\server.c(16,20): warning C4101: 'velocidade': variável local não referenciada
+C:\Users\Danie\Desktop\SO2_Frogger\Servidor\server.c(17,13): warning C4101: 'areaJogo': variável local não referenciada
+C:\Users\Danie\Desktop\SO2_Frogger\Servidor\server.c(16,9): warning C4101: 'rows': variável local não referenciada
+C:\Users\Danie\Desktop\SO2_Frogger\Servidor\server.c(13,11): warning C4101: 'resultado': variável local não referenciada
+C:\Users\Danie\Desktop\SO2_Frogger\Servidor\server.c(16,15): warning C4101: 'cols': variável local não referenciada
+  Servidor.vcxproj -> C:\Users\Danie\Desktop\SO2_Frogger\Servidor\x64\Debug\Servidor.exe
