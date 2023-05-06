@@ -1,3 +1,0 @@
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\Servidor\x64\Debug\Servidor.exe
-C:\Users\Danie\Desktop\SO2_Frogger\Servidor\x64\Debug\Servidor.exe
-C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\Servidor\x64\Debug\Servidor.exe

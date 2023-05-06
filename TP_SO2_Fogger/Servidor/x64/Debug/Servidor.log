@@ -1,0 +1,8 @@
+﻿  Servidor.cpp
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.cpp(6,21): warning C4101: 'numFaixas': variável local não referenciada
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.cpp(8,21): warning C4101: 'velocidade': variável local não referenciada
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.cpp(9,13): warning C4101: 'areaJogo': variável local não referenciada
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.cpp(8,9): warning C4101: 'rows': variável local não referenciada
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.cpp(5,11): warning C4101: 'resultado': variável local não referenciada
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.cpp(8,15): warning C4101: 'cols': variável local não referenciada
+  Servidor.vcxproj -> C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\x64\Debug\Servidor.exe
