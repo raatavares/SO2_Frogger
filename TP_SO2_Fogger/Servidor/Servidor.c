@@ -100,15 +100,8 @@ DWORD WINAPI ThreadRow(LPVOID param) {
         for (int i = 0; i < dados->cols; i++){
             //WaitForSingleObject(dados->hMutex, INFINITE);
 
-            if (dados->board[dados->faixaNumero][i] == TEXT('>')) {
-                dados->board[dados->faixaNumero][i] = TEXT(' ');
-                if (i == dados->cols - 1)   dados->board[dados->faixaNumero][0] = TEXT('>');
-                else   dados->board[dados->faixaNumero][i + 1] = TEXT('>');
-                
-
-
-            }
-            else if (dados->board[dados->faixaNumero][i] == TEXT('<')) {
+            
+            if (dados->board[dados->faixaNumero][i] == TEXT('<')) {
                 dados->board[dados->faixaNumero][i] = TEXT(' ');
                 if (i == 0)   dados->board[dados->faixaNumero][dados->cols - 1] = TEXT('<');
                 else   dados->board[dados->faixaNumero][i - 1] = TEXT('<');
@@ -119,8 +112,22 @@ DWORD WINAPI ThreadRow(LPVOID param) {
             }
 
             //ReleaseMutex(dados->hMutex);
+        }       
+
+        for (int l = dados->cols; l >= 0; l--) {
+
+            if (dados->board[dados->faixaNumero][l] == TEXT('>')) {
+                dados->board[dados->faixaNumero][l] = TEXT(' ');
+                if (l == dados->cols - 1)   dados->board[dados->faixaNumero][0] = TEXT('>');
+                else   dados->board[dados->faixaNumero][l + 1] = TEXT('>');
+
+
+
+            }
         }
         Sleep(dados->faixaVelocidade);
+        
+
 
 
     } while (1);
