@@ -1,2 +1,4 @@
 ﻿  Operador.c
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Operador\Operador.c(55,40): warning C4474: 'wprintf': excesso de argumentos transmitidos para cadeia de caracteres de formato
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Operador\Operador.c(55,40): message : espaços reservados e seus parâmetros esperam 0 argumentos variadic, mas 1 foram fornecidos
   Operador.vcxproj -> C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\x64\Debug\Operador.exe

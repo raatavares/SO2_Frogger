@@ -10,4 +10,5 @@
 HANDLE hMutex;
 
 
+DWORD WINAPI ThreadAtualizaMapa(LPVOID param);
 DWORD WINAPI ThreadComandos(LPVOID param);

@@ -25,6 +25,10 @@ typedef struct {
 
 typedef struct {
 	TCHAR board[10][20];
+	int rows, cols;
+	int maxPista;
+	int segundosParar, pistaInverter;
+	BOOLEAN insereObstaculo, paraMovimento, inverteSentido;
 	int TERMINAR;
 } DADOS;
 

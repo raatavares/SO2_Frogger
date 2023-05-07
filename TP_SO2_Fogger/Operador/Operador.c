@@ -3,7 +3,7 @@
 
 
 int _tmain(int argc, TCHAR* argv[]) {
-	HANDLE hThreadComandos;
+	HANDLE hThreadComandos, hThreadAtualizaMapa;
 	DADOS dados;
 	HINSTANCE hLib;
 	dados.TERMINAR = 0;
@@ -26,14 +26,39 @@ int _tmain(int argc, TCHAR* argv[]) {
 			_tprintf(TEXT("\n[ERRO] Erro ao lançar Thread!\n"));
 			return 0;
 		}
+		hThreadAtualizaMapa = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ThreadAtualizaMapa, (LPVOID)&dados, 0, NULL);
+		if (hThreadAtualizaMapa == NULL) {
+			_tprintf(TEXT("\n[ERRO] Erro ao lançar Thread!\n"));
+			return 0;
+		}
 
 
-		HANDLE ghEvents[1];
+		HANDLE ghEvents[2];
 		ghEvents[0] = hThreadComandos;
-		WaitForMultipleObjects(1, ghEvents, FALSE, INFINITE);
+		ghEvents[1] = hThreadAtualizaMapa;
+		WaitForMultipleObjects(2, ghEvents, FALSE, INFINITE);
 	}
 
 	return 0;
+}
+
+DWORD WINAPI ThreadAtualizaMapa(LPVOID param) {
+	DADOS* dados = ((DADOS*)param);
+
+	while(!dados->TERMINAR) {
+		WaitForSingleObject(hMutex, INFINITE);
+		_tprintf(TEXT("\n"));
+		for (int i = 0; i < dados->rows; i++) {
+			for (int j = 0; j < dados->cols; j++) {
+				_tprintf(TEXT("%c"), dados->board[i][j]);
+			}
+			_tprintf(TEXT("\n"));
+		}
+		ReleaseMutex(hMutex);
+		Sleep(1000);
+	};
+
+	ExitThread(0);
 }
 
 void ajuda() {
@@ -63,17 +88,21 @@ DWORD WINAPI ThreadComandos(LPVOID param) {
 				_tprintf(_T("\n[COMANDO] Introduza os segundos: "));
 				_tscanf_s(_T("%d"), &seg);
 			} while (seg <= 0);
+			dados->paraMovimento = TRUE;
+			dados->segundosParar = seg;
 		}
 		//INSERIR OBSTACULO
 		else if (!_tcscmp(op, TEXT("obstaculo"))) {
-			do {
-				_tprintf(_T("\n[COMANDO] Introduza a pista: "));
-				_tscanf_s(_T("%d"), &pista);
-			} while (pista < 0);
+			dados->insereObstaculo = TRUE;
 		}
 		//INVERTE SENTIDO DE RODAGEM DE X FAIXA
 		else if (!_tcscmp(op, TEXT("inverte"))) {
-
+			do {
+				_tprintf(_T("\n[COMANDO] Introduza a pista: "));
+				_tscanf_s(_T("%d"), &pista);
+			} while (pista < 0 || pista > dados->maxPista);
+			dados->inverteSentido = TRUE;
+			dados->pistaInverter = pista;
 		}
 		//AJUDA NOS COMANDOS
 		else if (!_tcscmp(op, TEXT("ajuda"))) {
