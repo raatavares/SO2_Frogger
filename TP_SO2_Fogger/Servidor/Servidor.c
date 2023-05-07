@@ -1,4 +1,4 @@
-﻿#include "Servidor.h"
+#include "Servidor.h"
 #include "..\\DLL\Header.h"
 //com mutex
 
@@ -83,6 +83,7 @@ void reinicializaBoard(TCHAR** areaJogo,int numFaixas, int cols) {
 DWORD WINAPI ThreadUI(LPVOID param) {
     TCHAR* command = (TCHAR*)param;
     TCHAR i;
+  
 
     do {
         //WaitForSingleObject(hMutex, INFINITE);
@@ -144,9 +145,8 @@ DWORD WINAPI ThreadRow(LPVOID param) {
     do {
         if (_tcscmp(dados->command, TEXT("para")));
         else continue;
-        WaitForSingleObject(dados->hMutex, INFINITE);
         if (!_tcscmp(dados->command, TEXT("restart"))) { reinicializaBoard(dados->board,dados->rows,dados->cols);dados->command[0] = '\0'; }
-        ReleaseMutex(dados->hMutex);
+
         for (int i = 0; i < dados->cols; i++){
             //WaitForSingleObject(dados->hMutex, INFINITE);
 
