@@ -52,10 +52,54 @@ TCHAR** createBoard(int numFaixas,int cols) {
         areaJogo[numFaixas + 1][j] = TEXT('-');
     }
     return areaJogo;
+}
+void reinicializaBoard(TCHAR** areaJogo,int numFaixas, int cols) {
+    for (int i = 1; i < numFaixas-1 ; i++) {
 
+        for (int j = 0; j < cols; j++) {
+            areaJogo[i][j] = TEXT(' ');
+        }
+    }
+    areaJogo[1][10] = TEXT('<');
+    areaJogo[1][2] = TEXT('<');
+    areaJogo[2][15] = TEXT('>');
+    areaJogo[2][6] = TEXT('>');
+    areaJogo[3][11] = TEXT('<');
+    areaJogo[3][3] = TEXT('<');
+    areaJogo[4][19] = TEXT('>');
+    areaJogo[4][4] = TEXT('>');
+    areaJogo[5][16] = TEXT('<');
+    areaJogo[5][8] = TEXT('<');
+    areaJogo[6][9] = TEXT('>');
+    areaJogo[6][1] = TEXT('>');
+    areaJogo[7][12] = TEXT('<');
+    areaJogo[7][3] = TEXT('<');
+    areaJogo[8][10] = TEXT('>');
+    areaJogo[8][2] = TEXT('>');
+    areaJogo[8][17] = TEXT('>');
 }
 
+DWORD WINAPI ThreadUI(LPVOID param) {
+    TCHAR* command = (TCHAR*)param;
+    TCHAR i;
+    TCHAR op[TAM];
 
+    do {
+        //WaitForSingleObject(hMutex, INFINITE);
+        
+
+        i = _gettch();
+        _tprintf(_T("%c"), i);
+        command[0] = i;
+        _fgetts(&command[1], sizeof(command), stdin);
+        command[_tcslen(command) - 1] = '\0';
+        _tprintf(_T("%s"), command);
+
+        //ReleaseMutex(hMutex);
+        Sleep(100);
+
+    } while (1);
+}
 DWORD WINAPI ThreadRow(LPVOID param) {
     data* dados = (data*)param;
 
@@ -98,6 +142,10 @@ DWORD WINAPI ThreadRow(LPVOID param) {
         break;
     }
     do {
+        if (_tcscmp(dados->command, TEXT("para")));
+        else continue;
+        if (!_tcscmp(dados->command, TEXT("restart"))) { reinicializaBoard(dados->board,dados->rows,dados->cols);dados->command[0] = '\0'; }
+
         for (int i = 0; i < dados->cols; i++){
             //WaitForSingleObject(dados->hMutex, INFINITE);
 
@@ -154,8 +202,9 @@ int _tmain(int argc, TCHAR* argv[]) {
     TCHAR** areaJogo;
     TCHAR chave_nome[TAM] = TEXT("SOFTWARE\\Frogger\\chave_TP");
     TCHAR par_nome[TAM] = TEXT("velocidade");
+    TCHAR command[TAM];
     DWORD par_valor;
-    HANDLE hRowThread[MAXFAIXAS]; 	
+    HANDLE hRowThread[MAXFAIXAS],hUIThread; 	
     
     HINSTANCE hLib;
 
@@ -230,6 +279,7 @@ int _tmain(int argc, TCHAR* argv[]) {
     if (!putSapo(areaJogo, numFaixas, cols)) _tprintf(TEXT("\nNao ha espaço "));
 
     for (int i = 0;i < numFaixas;i++) {
+        dados[i].command = command;
         dados[i].hMutex = hMutex;
         dados[i].faixaVelocidade = velocidade;
         dados[i].hEvent = hGlobalEvent;
@@ -242,19 +292,28 @@ int _tmain(int argc, TCHAR* argv[]) {
     }
     Sleep(1000);
     SetEvent(hGlobalEvent);
+    hUIThread = CreateThread(NULL, 0, ThreadUI, &command, 0, NULL);
+
+
     
+    
+    
+
     do {
         //WaitForSingleObject(hMutex, INFINITE);
         system("cls");
-        show(areaJogo, numFaixas, cols);
-        //ReleaseMutex(hMutex);
-        Sleep(velocidade);
+        show(areaJogo, rows - 2, cols);
+        if (!_tcscmp(dados->command, TEXT("para")))     _tprintf(TEXT("\nPressione uma tecla para retomar jogo:\n"));
+        else    _tprintf(TEXT("\nEscreva comando:\n"));
+
+        
+
+        
+        Sleep(100);
         
     } while (1);
 
-
-
-
+    WaitForMultipleObjects(2, hRowThread, FALSE, INFINITE);
 
 
 
