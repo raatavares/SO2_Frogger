@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Operador.cpp">
+    <ClCompile Include="Operador.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
   </ItemGroup>

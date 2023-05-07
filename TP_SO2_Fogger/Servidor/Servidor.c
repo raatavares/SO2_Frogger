@@ -1,4 +1,5 @@
 ﻿#include "Servidor.h"
+#include "..\\DLL\Header.h"
 
 void show(TCHAR** board, int numFaixas, int cols){
 _tprintf(TEXT("\n"));
@@ -154,7 +155,14 @@ int _tmain(int argc, TCHAR* argv[]) {
     TCHAR chave_nome[TAM] = TEXT("SOFTWARE\\Frogger\\chave_TP");
     TCHAR par_nome[TAM] = TEXT("velocidade");
     DWORD par_valor;
-    HANDLE hRowThread[MAXFAIXAS]; 
+    HANDLE hRowThread[MAXFAIXAS]; 	
+    
+    HINSTANCE hLib;
+
+    
+    hLib = LoadLibrary(PATH_DLL);
+    if (hLib == NULL)
+        return 0;
 
 
 
@@ -164,7 +172,6 @@ int _tmain(int argc, TCHAR* argv[]) {
     _setmode(_fileno(stdout), _O_WTEXT);
     _setmode(_fileno(stderr), _O_WTEXT);
 #endif
-
 
 
     hOneServer = CreateMutex(NULL, TRUE, _T("OneServer"));

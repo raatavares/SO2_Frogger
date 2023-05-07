@@ -127,7 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Operador.cpp" />
+    <ClCompile Include="Operador.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Operador.h" />

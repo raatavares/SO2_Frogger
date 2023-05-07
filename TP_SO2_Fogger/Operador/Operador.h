@@ -5,9 +5,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 
-#define PATH_DLL TEXT("..\\x64\\Debug\\DLL.dll")
 
-#define TAM 200
 
 HANDLE hMutex;
 

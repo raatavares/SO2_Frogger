@@ -10,18 +10,23 @@
 #include <stdlib.h>
 #include <time.h>
 
+#define TAM 200
+#define MAXFAIXAS 8
+
+#define PATH_DLL TEXT("..\\x64\\Debug\\DLL.dll")
 
 
 typedef struct {
-	char caracter;
-} MAPA;
+	HANDLE hEvent, hMutex;
+	TCHAR** board;
+	int rows, cols;
+	int faixaNumero, faixaVelocidade;
+} data;
 
 typedef struct {
+	TCHAR board[10][20];
 	int TERMINAR;
-	MAPA* mapa;
-	MAPA* sharedMap;
 } DADOS;
-
 
 #ifdef DLL_EXPORTS
 #define DLL_API __declspec(dllexport)//export
