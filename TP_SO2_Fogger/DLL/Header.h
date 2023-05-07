@@ -21,6 +21,7 @@ typedef struct {
 	TCHAR** board;
 	int rows, cols;
 	int faixaNumero, faixaVelocidade;
+	TCHAR* command;
 } data;
 
 typedef struct {
