@@ -145,10 +145,12 @@ DWORD WINAPI ThreadRow(LPVOID param) {
     do {
         if (_tcscmp(dados->command, TEXT("para")));
         else continue;
+        WaitForSingleObject(dados->hMutex, INFINITE);
         if (!_tcscmp(dados->command, TEXT("restart"))) { reinicializaBoard(dados->board,dados->rows,dados->cols);dados->command[0] = '\0'; }
-
+        ReleaseMutex(dados->hMutex);
         for (int i = 0; i < dados->cols; i++){
             //WaitForSingleObject(dados->hMutex, INFINITE);
+
 
             
             if (dados->board[dados->faixaNumero][i] == TEXT('<')) {
