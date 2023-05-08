@@ -27,6 +27,18 @@ typedef struct {
 typedef struct {
 	TCHAR board[10][20];
 	int rows, cols;
+}matriz;
+typedef struct {
+	data* jogo;
+	matriz* board;
+	HANDLE hEvent;
+	HANDLE hMutex;
+} mapping; //struct para mapping
+
+
+typedef struct {
+	TCHAR board[10][20];
+	int rows, cols;
 	int maxPista;
 	int segundosParar, pistaInverter;
 	BOOLEAN insereObstaculo, paraMovimento, inverteSentido;

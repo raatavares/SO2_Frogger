@@ -97,10 +97,11 @@ DWORD WINAPI ThreadUI(LPVOID param) {
         _tprintf(_T("%s"), command);
 
         //ReleaseMutex(hMutex);
-        Sleep(100);
+        
 
     } while (1);
 }
+
 DWORD WINAPI ThreadRow(LPVOID param) {
     data* dados = (data*)param;
 
@@ -193,8 +194,37 @@ DWORD WINAPI ThreadRow(LPVOID param) {
     return 0;
 
 }
+DWORD WINAPI ThreadMapping(LPVOID param) {
+    mapping* dados = (mapping*)param;
+    matriz dadosPassados;
+
+
+    while (1) {
+        WaitForSingleObject(dados->hMutex, INFINITE);
+        
+        ZeroMemory(dados->board, sizeof(matriz));
+        dadosPassados.rows = dados->jogo->rows;
+        dadosPassados.cols = dados->jogo->cols;
+        for (int i = 0; i < dados->jogo->rows; i++) {
+            for (int j = 0; j < dados->jogo->cols; j++) {
+                dadosPassados.board[i][j] = dados->jogo->board[i][j];
+            }
+        }
+        CopyMemory(dados->board, &dadosPassados,sizeof(matriz));
+
+        ReleaseMutex(dados->hMutex);
+
+        //criamos evento
+        SetEvent(dados->hEvent);
+        Sleep(500);
+
+        ResetEvent(dados->hEvent); //torna o evento novamente não assinalado
+
+    }
+}
 
 int _tmain(int argc, TCHAR* argv[]) {
+    mapping pDados;
     data dados[MAXFAIXAS];
     HKEY chave;
     DWORD resultado;
@@ -207,7 +237,8 @@ int _tmain(int argc, TCHAR* argv[]) {
     TCHAR par_nome[TAM] = TEXT("velocidade");
     TCHAR command[TAM];
     DWORD par_valor;
-    HANDLE hRowThread[MAXFAIXAS],hUIThread; 	
+    HANDLE hRowThread[MAXFAIXAS],hUIThread,hMapThread; 
+    HANDLE hFileMap;
     
     HINSTANCE hLib;
 
@@ -263,7 +294,47 @@ int _tmain(int argc, TCHAR* argv[]) {
     }
 
     rows = numFaixas + 2;
+
     
+    //----- mapping -----
+    hFileMap = CreateFileMapping(INVALID_HANDLE_VALUE,NULL,PAGE_READWRITE,0,sizeof(mapping),TEXT("TP_MEM_PART"));
+    if (hFileMap == NULL) {
+        _tprintf(TEXT("Erro no CreateFileMapping\n"));
+        return 1;
+    }
+     pDados.board= (matriz*)MapViewOfFile(hFileMap, FILE_MAP_ALL_ACCESS, 0, 0, 0);
+     pDados.jogo = &dados[0];
+    if (pDados.board == NULL) {
+        _tprintf(TEXT("Erro no MapViewOfFile\n"));
+        CloseHandle(hFileMap);
+        return 1;
+    }
+
+    pDados.hEvent = CreateEvent(
+        NULL,
+        TRUE,
+        FALSE,
+        TEXT("Map_EVENTO"));
+
+    if (pDados.hEvent == NULL) {
+        _tprintf(TEXT("Erro no CreateEvent\n"));
+        UnmapViewOfFile(pDados.board);
+        return 1;
+    }
+
+    pDados.hMutex = CreateMutex(
+        NULL,
+        FALSE,
+        TEXT("Map_MUTEX"));
+
+    if (pDados.hMutex == NULL) {
+        _tprintf(TEXT("Erro no CreateMutex\n"));
+        UnmapViewOfFile(pDados.board);
+        return 1;
+    }
+    //-------
+
+
 
     hGlobalEvent= CreateEvent(NULL, TRUE, FALSE, NULL);
     if (hGlobalEvent == NULL) {
@@ -297,6 +368,7 @@ int _tmain(int argc, TCHAR* argv[]) {
     SetEvent(hGlobalEvent);
     hUIThread = CreateThread(NULL, 0, ThreadUI, &command, 0, NULL);
 
+    hMapThread = CreateThread(NULL, 0, ThreadMapping, &pDados, 0, NULL);
 
     
     
@@ -322,6 +394,7 @@ int _tmain(int argc, TCHAR* argv[]) {
 
 
     //fechar handlers e memoria dinamica
+    UnmapViewOfFile(pDados.board);
     for (int i = 0;i < numFaixas;i++)
         CloseHandle(hRowThread[i]);
 
@@ -331,6 +404,7 @@ int _tmain(int argc, TCHAR* argv[]) {
     free(areaJogo);
     
     ReleaseMutex(hOneServer);
+    CloseHandle(hFileMap);
     CloseHandle(hMutex);
     CloseHandle(hOneServer);
     return 0;
