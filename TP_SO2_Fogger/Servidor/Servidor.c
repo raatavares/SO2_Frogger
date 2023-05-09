@@ -238,7 +238,6 @@ int _tmain(int argc, TCHAR* argv[]) {
     TCHAR command[TAM];
     DWORD par_valor;
     HANDLE hRowThread[MAXFAIXAS],hUIThread,hMapThread; 
-    HANDLE hFileMap;
     
     HINSTANCE hLib;
 
@@ -297,16 +296,16 @@ int _tmain(int argc, TCHAR* argv[]) {
 
     
     //----- mapping -----
-    hFileMap = CreateFileMapping(INVALID_HANDLE_VALUE,NULL,PAGE_READWRITE,0,sizeof(mapping),TEXT("TP_MEM_PART"));
-    if (hFileMap == NULL) {
+    pDados.hFileMap = CreateFileMapping(INVALID_HANDLE_VALUE,NULL,PAGE_READWRITE,0,sizeof(mapping),TEXT("TP_MEM_PART"));
+    if (pDados.hFileMap == NULL) {
         _tprintf(TEXT("Erro no CreateFileMapping\n"));
         return 1;
     }
-     pDados.board= (matriz*)MapViewOfFile(hFileMap, FILE_MAP_ALL_ACCESS, 0, 0, 0);
+     pDados.board= (matriz*)MapViewOfFile(pDados.hFileMap, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(pDados.board));
      pDados.jogo = &dados[0];
     if (pDados.board == NULL) {
         _tprintf(TEXT("Erro no MapViewOfFile\n"));
-        CloseHandle(hFileMap);
+        CloseHandle(pDados.hFileMap);
         return 1;
     }
 
@@ -404,7 +403,7 @@ int _tmain(int argc, TCHAR* argv[]) {
     free(areaJogo);
     
     ReleaseMutex(hOneServer);
-    CloseHandle(hFileMap);
+    CloseHandle(pDados.hFileMap);
     CloseHandle(hMutex);
     CloseHandle(hOneServer);
     return 0;

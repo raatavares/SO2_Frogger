@@ -29,21 +29,20 @@ typedef struct {
 	int rows, cols;
 }matriz;
 typedef struct {
+	int TERMINAR;
 	data* jogo;
 	matriz* board;
+	HANDLE hFileMap;
 	HANDLE hEvent;
 	HANDLE hMutex;
 } mapping; //struct para mapping
 
 
 typedef struct {
-	TCHAR board[10][20];
-	int rows, cols;
 	int maxPista;
 	int segundosParar, pistaInverter;
 	BOOLEAN insereObstaculo, paraMovimento, inverteSentido;
-	int TERMINAR;
-} DADOS;
+} buffer_circular;
 
 #ifdef DLL_EXPORTS
 #define DLL_API __declspec(dllexport)//export

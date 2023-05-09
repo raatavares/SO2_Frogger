@@ -2,55 +2,51 @@
 #include "..\\DLL\Header.h"
 
 
-int _tmain(int argc, TCHAR* argv[]) {
-	HANDLE hThreadComandos, hThreadAtualizaMapa;
-	DADOS dados;
-	HINSTANCE hLib;
-	dados.TERMINAR = 0;
-
-	hLib = LoadLibrary(PATH_DLL);
-	if (hLib == NULL)
-		return 0;
 
 
-#ifdef UNICODE 
-	_setmode(_fileno(stdin), _O_WTEXT);
-	_setmode(_fileno(stdout), _O_WTEXT);
-	_setmode(_fileno(stderr), _O_WTEXT);
-#endif
 
-
-	if (!dados.TERMINAR) {
-		hThreadComandos = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ThreadComandos, (LPVOID)&dados, 0, NULL);
-		if (hThreadComandos == NULL) {
-			_tprintf(TEXT("\n[ERRO] Erro ao lançar Thread!\n"));
-			return 0;
-		}
-		hThreadAtualizaMapa = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ThreadAtualizaMapa, (LPVOID)&dados, 0, NULL);
-		if (hThreadAtualizaMapa == NULL) {
-			_tprintf(TEXT("\n[ERRO] Erro ao lançar Thread!\n"));
-			return 0;
-		}
-
-
-		HANDLE ghEvents[2];
-		ghEvents[0] = hThreadComandos;
-		ghEvents[1] = hThreadAtualizaMapa;
-		WaitForMultipleObjects(2, ghEvents, FALSE, INFINITE);
+void leMapa(mapping* pDados) {
+	pDados->hFileMap = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(mapping), TEXT("TP_MEM_PART"));
+	if (pDados->hFileMap == NULL) {
+		_tprintf(TEXT("Erro no CreateFileMapping\n"));
+		return;
+	}
+	pDados->board = (matriz*)MapViewOfFile(pDados->hFileMap, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(pDados->board));
+	if (pDados->board == NULL) {
+		_tprintf(TEXT("Erro no MapViewOfFile\n"));
+		CloseHandle(pDados->hFileMap);
+		return;
 	}
 
-	return 0;
+	matriz* aux = NULL;
+	CopyMemory(&aux, pDados->board, sizeof(pDados->board));
+	if (aux == NULL) {
+		_tprintf(TEXT("\n[MAPA] CenTaxi não enviou mapa!\n"));
+		pDados->board = NULL;
+		return;
+	}
+	for (int i = 0; i < pDados->board->rows; i++) {
+		for (int j = 0; j < pDados->board->cols; j++) {
+			_tprintf(TEXT("%c"), pDados->board->board[i][j]);
+		}
+		_tprintf(TEXT("\n"));
+	}
+
+	_tprintf(TEXT("\n[MAPA] Mapa lido com sucesso!\n\n"));
+
+	return;
 }
 
 DWORD WINAPI ThreadAtualizaMapa(LPVOID param) {
-	DADOS* dados = ((DADOS*)param);
+	mapping* pDados = ((mapping*)param);
 
-	while(!dados->TERMINAR) {
+
+	while (!pDados->TERMINAR) {
 		WaitForSingleObject(hMutex, INFINITE);
 		_tprintf(TEXT("\n"));
-		for (int i = 0; i < dados->rows; i++) {
-			for (int j = 0; j < dados->cols; j++) {
-				_tprintf(TEXT("%c"), dados->board[i][j]);
+		for (int i = 0; i < pDados->board->rows; i++) {
+			for (int j = 0; j < pDados->board->cols; j++) {
+				_tprintf(TEXT("%c"), pDados->board->board[i][j]);
 			}
 			_tprintf(TEXT("\n"));
 		}
@@ -71,7 +67,7 @@ void ajuda() {
 
 DWORD WINAPI ThreadComandos(LPVOID param) {
 	TCHAR op[TAM], i;
-	DADOS* dados = ((DADOS*)param);
+	buffer_circular* dados = ((buffer_circular*)param);
 	int seg, pista;
 
 	do {
@@ -116,11 +112,62 @@ DWORD WINAPI ThreadComandos(LPVOID param) {
 		_tprintf(_T("\n\n"));
 	} while (_tcscmp(op, TEXT("fim")));
 
-	dados->TERMINAR = 1;
+	//pDados->TERMINAR = 1;
 
 	ReleaseMutex(hMutex);
 
 	Sleep(1000);
 
 	ExitThread(0);
+}
+
+
+int _tmain(int argc, TCHAR* argv[]) {
+	HANDLE hThreadComandos, hThreadAtualizaMapa;
+	buffer_circular dados;
+	mapping pDados;
+	HINSTANCE hLib;
+	pDados.TERMINAR = 0;
+
+	hLib = LoadLibrary(PATH_DLL);
+	if (hLib == NULL)
+		return 0;
+
+
+#ifdef UNICODE 
+	_setmode(_fileno(stdin), _O_WTEXT);
+	_setmode(_fileno(stdout), _O_WTEXT);
+	_setmode(_fileno(stderr), _O_WTEXT);
+#endif
+
+
+	leMapa(&pDados);
+	if (pDados.board == NULL) {
+		UnmapViewOfFile(pDados.board);
+		CloseHandle(pDados.hFileMap);
+		return 0;
+	}
+
+
+
+	if (!pDados.TERMINAR) {
+		hThreadComandos = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ThreadComandos, (LPVOID)&dados, 0, NULL);
+		if (hThreadComandos == NULL) {
+			_tprintf(TEXT("\n[ERRO] Erro ao lançar Thread!\n"));
+			return 0;
+		}
+		hThreadAtualizaMapa = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ThreadAtualizaMapa, (LPVOID)&pDados, 0, NULL);
+		if (hThreadAtualizaMapa == NULL) {
+			_tprintf(TEXT("\n[ERRO] Erro ao lançar Thread!\n"));
+			return 0;
+		}
+
+
+		HANDLE ghEvents[2];
+		ghEvents[0] = hThreadComandos;
+		ghEvents[1] = hThreadAtualizaMapa;
+		WaitForMultipleObjects(2, ghEvents, FALSE, INFINITE);
+	}
+
+	return 0;
 }

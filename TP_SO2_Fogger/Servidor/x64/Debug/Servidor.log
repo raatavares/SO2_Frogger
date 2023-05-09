@@ -1,5 +1,5 @@
 ﻿  Servidor.c
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(344,44): warning C4020: 'CreateMutexW': muitos parâmetros reais
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(239,11): warning C4101: 'par_valor': variável local não referenciada
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(230,11): warning C4101: 'resultado': variável local não referenciada
-  Servidor.vcxproj -> C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\x64\Debug\Servidor.exe
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(343,44): warning C4020: 'CreateMutexW': muitos parâmetros reais
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(239,11): warning C4101: 'par_valor': variável local não referenciada
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(230,11): warning C4101: 'resultado': variável local não referenciada
+  Servidor.vcxproj -> C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\x64\Debug\Servidor.exe
