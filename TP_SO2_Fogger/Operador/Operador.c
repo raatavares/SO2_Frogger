@@ -21,7 +21,7 @@ void leMapa(mapping* pDados) {
 	matriz* aux = NULL;
 	CopyMemory(&aux, pDados->board, sizeof(pDados->board));
 	if (aux == NULL) {
-		_tprintf(TEXT("\n[MAPA] CenTaxi não enviou mapa!\n"));
+		_tprintf(TEXT("\n[MAPA] Servidor não enviou mapa!\n"));
 		pDados->board = NULL;
 		return;
 	}
@@ -69,52 +69,54 @@ DWORD WINAPI ThreadComandos(LPVOID param) {
 	TCHAR op[TAM], i;
 	buffer_circular* dados = ((buffer_circular*)param);
 	int seg, pista;
+	pedido pedidoN;
+	dados->posE = 0;
+	dados->posL = 0;
 
 	do {
 		_tprintf(_T("\n\n"));
-		i = _gettch();
+		fflush(stdin);
+		_fgetts(op, sizeof(op) / sizeof(TCHAR), stdin);
 		WaitForSingleObject(hMutex, INFINITE);
-		_tprintf(_T("%c"), i);
-		op[0] = i;
-		_fgetts(&op[1], sizeof(op), stdin);
 		op[_tcslen(op) - 1] = '\0';
-		//PARA O MOVIMENTO DOS CARROS POR X SEGUNDOS
+
+
 		if (!_tcscmp(op, TEXT("para"))) {
 			do {
 				_tprintf(_T("\n[COMANDO] Introduza os segundos: "));
 				_tscanf_s(_T("%d"), &seg);
 			} while (seg <= 0);
-			dados->paraMovimento = TRUE;
-			dados->segundosParar = seg;
+			pedidoN.paraMovimento = 1;
+			pedidoN.segundosParar = seg;
+			CopyMemory(&dados->pedidos[dados->posE], &pedidoN, sizeof(pedido));
+			dados->posE = (dados->posE + 1) % BUFFER_SIZE;  // Avança a posição de escrita no buffer circular
 		}
-		//INSERIR OBSTACULO
 		else if (!_tcscmp(op, TEXT("obstaculo"))) {
-			dados->insereObstaculo = TRUE;
+			pedidoN.insereObstaculo = 1;
+			CopyMemory(&dados->pedidos[dados->posE], &pedidoN, sizeof(pedido));
+			dados->posE = (dados->posE + 1) % BUFFER_SIZE;  // Avança a posição de escrita no buffer circular
 		}
-		//INVERTE SENTIDO DE RODAGEM DE X FAIXA
 		else if (!_tcscmp(op, TEXT("inverte"))) {
 			do {
 				_tprintf(_T("\n[COMANDO] Introduza a pista: "));
 				_tscanf_s(_T("%d"), &pista);
-			} while (pista < 0 || pista > dados->maxPista);
-			dados->inverteSentido = TRUE;
-			dados->pistaInverter = pista;
+			} while (pista < 0);
+			pedidoN.inverteSentido = 1;
+			pedidoN.pistaInverter = pista;
+			CopyMemory(&dados->pedidos[dados->posE], &pedidoN, sizeof(pedido));
+			dados->posE = (dados->posE + 1) % BUFFER_SIZE;  // Avança a posição de escrita no buffer circular
 		}
-		//AJUDA NOS COMANDOS
 		else if (!_tcscmp(op, TEXT("ajuda"))) {
 			_tprintf(_T("\n[COMANDO] Aqui vai uma ajuda..."));
 			ajuda();
 		}
-		if (_tcscmp(op, TEXT("fim")))
-			ReleaseMutex(hMutex);
-		else
-			_tprintf(_T("\nA sair...\n"));
+
+		ReleaseMutex(hMutex);
+
 		_tprintf(_T("\n\n"));
 	} while (_tcscmp(op, TEXT("fim")));
 
-	//pDados->TERMINAR = 1;
-
-	ReleaseMutex(hMutex);
+	_tprintf(_T("\nA sair...\n"));
 
 	Sleep(1000);
 

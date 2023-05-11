@@ -12,6 +12,7 @@
 
 #define TAM 200
 #define MAXFAIXAS 8
+#define BUFFER_SIZE 10
 
 #define PATH_DLL TEXT("..\\x64\\Debug\\DLL.dll")
 
@@ -39,9 +40,14 @@ typedef struct {
 
 
 typedef struct {
-	int maxPista;
 	int segundosParar, pistaInverter;
-	BOOLEAN insereObstaculo, paraMovimento, inverteSentido;
+	int insereObstaculo, paraMovimento, inverteSentido;
+} pedido;
+
+typedef struct {
+	pedido pedidos[BUFFER_SIZE];
+	int posE; //proxima posicao de escrita
+	int posL; //proxima posicao de leitura
 } buffer_circular;
 
 #ifdef DLL_EXPORTS
