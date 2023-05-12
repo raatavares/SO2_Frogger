@@ -1,3 +1,3 @@
 ﻿  Operador.c
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Operador\Operador.c(69,17): warning C4101: 'i': variável local não referenciada
-  Operador.vcxproj -> C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\x64\Debug\Operador.exe
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Operador\Operador.c(70,9): warning C4101: 'pedidoN': variável local não referenciada
+  Operador.vcxproj -> C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\x64\Debug\Operador.exe

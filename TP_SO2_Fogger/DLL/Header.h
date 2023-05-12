@@ -38,6 +38,8 @@ typedef struct {
 	HANDLE hMutex;
 } mapping; //struct para mapping
 
+//Semaforo AtualizaMapa
+HANDLE hSemAtualizaMapa;
 
 typedef struct {
 	int segundosParar, pistaInverter;
@@ -50,9 +52,15 @@ typedef struct {
 	int posL; //proxima posicao de leitura
 } buffer_circular;
 
+//Mapping BufferCircular
+HANDLE hFileBuffer;
+//Semaforo BufferCircular
+HANDLE hSemEscrita, hSemLeitura;
+
 #ifdef DLL_EXPORTS
 #define DLL_API __declspec(dllexport)//export
 #else
 #define DLL_API __declspec(dllimport)//import
 #endif
 
+extern DLL_API void inicializaBuffer(buffer_circular* buffer);

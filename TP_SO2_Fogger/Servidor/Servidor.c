@@ -149,7 +149,7 @@ DWORD WINAPI ThreadRow(LPVOID param) {
         WaitForSingleObject(dados->hMutex, INFINITE);
         if (!_tcscmp(dados->command, TEXT("restart"))) { reinicializaBoard(dados->board,dados->rows,dados->cols);dados->command[0] = '\0'; }
         ReleaseMutex(dados->hMutex);
-
+        
         for (int i = 0; i < dados->cols; i++){
             //WaitForSingleObject(dados->hMutex, INFINITE);
 
@@ -215,6 +215,9 @@ DWORD WINAPI ThreadMapping(LPVOID param) {
 
         ReleaseMutex(dados->hMutex);
 
+        //Semaforo Atualiza Mapa
+        ReleaseSemaphore(hSemAtualizaMapa, 1, NULL);
+
         //criamos evento
         SetEvent(dados->hEvent);
         Sleep(500);
@@ -226,41 +229,27 @@ DWORD WINAPI ThreadMapping(LPVOID param) {
 DWORD WINAPI ThreadBuffer(LPVOID param) {
     pedido pedido;
     buffer_circular* bufferData;
-    HANDLE hFileBuffer;
-    HANDLE hSemEscrita, hSemLeitura;
     HANDLE hMutexBuffer;
 
-    hSemEscrita = CreateSemaphore(NULL, BUFFER_SIZE, BUFFER_SIZE, TEXT("TP_SEMAFORO_ESCRITA"));
-    hSemLeitura = CreateSemaphore(NULL, 0, BUFFER_SIZE, TEXT("TP_SEMAFORO_LEITURA"));
+    bufferData = (buffer_circular*)malloc(sizeof(buffer_circular));
+
     hMutexBuffer = CreateMutex(NULL, FALSE, TEXT("TP_MUTEX_CONSUMIDOR"));
-    if (hSemEscrita == NULL || hSemLeitura == NULL || hMutexBuffer == NULL) {
-        _tprintf(TEXT("Erro no CreateSemaphore ou no CreateMutex\n"));
+    if (hMutexBuffer == NULL) {
+        _tprintf(TEXT("Erro no CreateMutex\n"));
         return -1;
     }
 
-
-    
-    hFileBuffer = CreateFileMapping(
-        INVALID_HANDLE_VALUE,
-        NULL,
-        PAGE_READWRITE,
-        0,
-        sizeof(buffer_circular), //tamanho da memoria partilhada
-        TEXT("TP_BufferCircular"));//nome do filemapping. nome que vai ser usado para partilha entre processos
-
-    if (hFileBuffer == NULL) {
-        _tprintf(TEXT("Erro no CreateFileMapping\n"));
-        return -1;
+    inicializaBuffer(bufferData);
+    hSemEscrita = CreateSemaphore(NULL, BUFFER_SIZE, BUFFER_SIZE, TEXT("TP_SEMAFORO_ESCRITA"));
+    if (hSemEscrita == NULL) {
+        _tprintf(TEXT("Erro no CreateSemaphore\n"));
+        return;
     }
-
-    bufferData = (buffer_circular*)MapViewOfFile(hFileBuffer, FILE_MAP_ALL_ACCESS, 0, 0, 0);
-    if (bufferData == NULL) {
-        _tprintf(TEXT("Erro no MapViewOfFile\n"));
-        return -1;
+    hSemLeitura = CreateSemaphore(NULL, 0, BUFFER_SIZE, TEXT("TP_SEMAFORO_LEITURA"));
+    if (hSemLeitura == NULL) {
+        _tprintf(TEXT("Erro no CreateSemaphore\n"));
+        return;
     }
-
-    bufferData->posE = 0;
-    bufferData->posL = 0;
 
     while (1){
         WaitForSingleObject(hSemLeitura, INFINITE);
@@ -294,20 +283,11 @@ int _tmain(int argc, TCHAR* argv[]) {
     int cols = 20, velocidade,rows;
     TCHAR** areaJogo;
     TCHAR chave_nome[TAM] = TEXT("SOFTWARE\\Frogger\\chave_TP");
-    TCHAR par_nome[TAM] = TEXT("velocidade");
+    TCHAR par_nome[TAM] = TEXT("SOFTWARE\\Frogger\\velocidade");
     TCHAR command[TAM];
     DWORD par_valor;
     HANDLE hRowThread[MAXFAIXAS],hUIThread,hMapThread, hBufferThread;
     
-    HINSTANCE hLib;
-
-    
-    hLib = LoadLibrary(PATH_DLL);
-    if (hLib == NULL)
-        return 0;
-
-
-
 
 #ifdef UNICODE 
     _setmode(_fileno(stdin), _O_WTEXT);
@@ -400,6 +380,12 @@ int _tmain(int argc, TCHAR* argv[]) {
     if (pDados.hMutex == NULL) {
         _tprintf(TEXT("Erro no CreateMutex\n"));
         UnmapViewOfFile(pDados.board);
+        return 1;
+    }
+
+    hSemAtualizaMapa = CreateSemaphore(NULL, 0, BUFFER_SIZE, TEXT("TP_SEMAFORO_MAPA"));
+    if (hSemAtualizaMapa == NULL) {
+        _tprintf(TEXT("Erro no CreateSemaphore\n"));
         return 1;
     }
     //-------

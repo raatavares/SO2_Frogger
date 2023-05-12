@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.3.32922.545
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Operador", "Operador\Operador.vcxproj", "{0AEE6189-CAC2-4C76-BDA0-9DCBB8FCD013}"
+	ProjectSection(ProjectDependencies) = postProject
+		{800D916F-EF49-4593-B33F-38486DDBC611} = {800D916F-EF49-4593-B33F-38486DDBC611}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Servidor", "Servidor\Servidor.vcxproj", "{8A5ADFCF-3CA6-4191-8771-F2BA9451C8EB}"
 EndProject

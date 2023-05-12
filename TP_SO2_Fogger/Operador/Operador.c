@@ -3,8 +3,6 @@
 
 
 
-
-
 void leMapa(mapping* pDados) {
 	pDados->hFileMap = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(mapping), TEXT("TP_MEM_PART"));
 	if (pDados->hFileMap == NULL) {
@@ -25,6 +23,12 @@ void leMapa(mapping* pDados) {
 		pDados->board = NULL;
 		return;
 	}
+	hSemAtualizaMapa = CreateSemaphore(NULL, 0, BUFFER_SIZE, TEXT("TP_SEMAFORO_MAPA"));
+	if (hSemAtualizaMapa == NULL) {
+		_tprintf(TEXT("Erro no CreateSemaphore\n"));
+		return 1;
+	}
+
 	for (int i = 0; i < pDados->board->rows; i++) {
 		for (int j = 0; j < pDados->board->cols; j++) {
 			_tprintf(TEXT("%c"), pDados->board->board[i][j]);
@@ -40,8 +44,8 @@ void leMapa(mapping* pDados) {
 DWORD WINAPI ThreadAtualizaMapa(LPVOID param) {
 	mapping* pDados = ((mapping*)param);
 
-
 	while (!pDados->TERMINAR) {
+		WaitForSingleObject(hSemAtualizaMapa, INFINITE);
 		WaitForSingleObject(hMutex, INFINITE);
 		_tprintf(TEXT("\n"));
 		for (int i = 0; i < pDados->board->rows; i++) {
@@ -66,51 +70,68 @@ void ajuda() {
 }
 
 DWORD WINAPI ThreadComandos(LPVOID param) {
-	TCHAR op[TAM], i;
-	buffer_circular* dados = ((buffer_circular*)param);
+	TCHAR op[TAM];
+	buffer_circular* buffer = ((buffer_circular*)param);
 	int seg, pista;
 	pedido pedidoN;
-	dados->posE = 0;
-	dados->posL = 0;
+
+	buffer = (buffer_circular*)malloc(sizeof(buffer_circular));
+	inicializaBuffer(buffer);
+	hSemEscrita = CreateSemaphore(NULL, BUFFER_SIZE, BUFFER_SIZE, TEXT("TP_SEMAFORO_ESCRITA"));
+	if (hSemEscrita == NULL) {
+		_tprintf(TEXT("Erro no CreateSemaphore\n"));
+		return 0;
+	}
+	hSemLeitura = CreateSemaphore(NULL, 0, BUFFER_SIZE, TEXT("TP_SEMAFORO_LEITURA"));
+	if (hSemLeitura == NULL) {
+		_tprintf(TEXT("Erro no CreateSemaphore\n"));
+		return 0;
+	}
+	buffer->posE = 0;
+	buffer->posL = 0;
 
 	do {
 		_tprintf(_T("\n\n"));
 		fflush(stdin);
 		_fgetts(op, sizeof(op) / sizeof(TCHAR), stdin);
 		WaitForSingleObject(hMutex, INFINITE);
+		WaitForSingleObject(hSemEscrita, INFINITE);
 		op[_tcslen(op) - 1] = '\0';
-
 
 		if (!_tcscmp(op, TEXT("para"))) {
 			do {
 				_tprintf(_T("\n[COMANDO] Introduza os segundos: "));
 				_tscanf_s(_T("%d"), &seg);
 			} while (seg <= 0);
-			pedidoN.paraMovimento = 1;
-			pedidoN.segundosParar = seg;
-			CopyMemory(&dados->pedidos[dados->posE], &pedidoN, sizeof(pedido));
-			dados->posE = (dados->posE + 1) % BUFFER_SIZE;  // Avança a posição de escrita no buffer circular
+			buffer->pedidos[buffer->posE].paraMovimento = 1;
+			buffer->pedidos[buffer->posE].segundosParar = seg;
+			//CopyMemory(&buffer->pedidos[buffer->posE], &pedidoN, sizeof(pedido));
+			buffer->posE = (buffer->posE + 1) % BUFFER_SIZE;  // Avança a posição de escrita no buffer circular
 		}
 		else if (!_tcscmp(op, TEXT("obstaculo"))) {
-			pedidoN.insereObstaculo = 1;
-			CopyMemory(&dados->pedidos[dados->posE], &pedidoN, sizeof(pedido));
-			dados->posE = (dados->posE + 1) % BUFFER_SIZE;  // Avança a posição de escrita no buffer circular
+			buffer->pedidos[buffer->posE].insereObstaculo = 1;
+			//CopyMemory(&buffer->pedidos[buffer->posE], &pedidoN, sizeof(pedido));
+			buffer->posE = (buffer->posE + 1) % BUFFER_SIZE;  // Avança a posição de escrita no buffer circular
 		}
 		else if (!_tcscmp(op, TEXT("inverte"))) {
 			do {
 				_tprintf(_T("\n[COMANDO] Introduza a pista: "));
 				_tscanf_s(_T("%d"), &pista);
 			} while (pista < 0);
-			pedidoN.inverteSentido = 1;
-			pedidoN.pistaInverter = pista;
-			CopyMemory(&dados->pedidos[dados->posE], &pedidoN, sizeof(pedido));
-			dados->posE = (dados->posE + 1) % BUFFER_SIZE;  // Avança a posição de escrita no buffer circular
+			_tprintf(_T("\nRR"));
+			buffer->pedidos[buffer->posE].inverteSentido = 1;
+			_tprintf(_T("\n2"));
+			buffer->pedidos[buffer->posE].pistaInverter = pista;
+			_tprintf(_T("\n3"));
+			//CopyMemory(&buffer->pedidos[buffer->posE], &pedidoN, sizeof(pedido));
+			buffer->posE = (buffer->posE + 1) % BUFFER_SIZE;  // Avança a posição de escrita no buffer circular
 		}
 		else if (!_tcscmp(op, TEXT("ajuda"))) {
 			_tprintf(_T("\n[COMANDO] Aqui vai uma ajuda..."));
 			ajuda();
 		}
 
+		ReleaseSemaphore(hSemLeitura, 1, NULL);
 		ReleaseMutex(hMutex);
 
 		_tprintf(_T("\n\n"));
@@ -126,14 +147,9 @@ DWORD WINAPI ThreadComandos(LPVOID param) {
 
 int _tmain(int argc, TCHAR* argv[]) {
 	HANDLE hThreadComandos, hThreadAtualizaMapa;
-	buffer_circular dados;
+	buffer_circular buffer;
 	mapping pDados;
-	HINSTANCE hLib;
 	pDados.TERMINAR = 0;
-
-	hLib = LoadLibrary(PATH_DLL);
-	if (hLib == NULL)
-		return 0;
 
 
 #ifdef UNICODE 
@@ -150,10 +166,8 @@ int _tmain(int argc, TCHAR* argv[]) {
 		return 0;
 	}
 
-
-
 	if (!pDados.TERMINAR) {
-		hThreadComandos = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ThreadComandos, (LPVOID)&dados, 0, NULL);
+		hThreadComandos = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ThreadComandos, (LPVOID)&buffer, 0, NULL);
 		if (hThreadComandos == NULL) {
 			_tprintf(TEXT("\n[ERRO] Erro ao lançar Thread!\n"));
 			return 0;
@@ -163,7 +177,6 @@ int _tmain(int argc, TCHAR* argv[]) {
 			_tprintf(TEXT("\n[ERRO] Erro ao lançar Thread!\n"));
 			return 0;
 		}
-
 
 		HANDLE ghEvents[2];
 		ghEvents[0] = hThreadComandos;
