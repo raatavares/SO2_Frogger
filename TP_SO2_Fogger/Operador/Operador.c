@@ -158,6 +158,9 @@ int _tmain(int argc, TCHAR* argv[]) {
 	_setmode(_fileno(stderr), _O_WTEXT);
 #endif
 
+	_tprintf(TEXT("\nA aguardar...\n"));
+	HANDLE hSemInstancias = CreateSemaphore(NULL, 2, 2, TEXT("SEM_INSTANCIAS"));
+	WaitForSingleObject(hSemInstancias, INFINITE);
 
 	leMapa(&pDados);
 	if (pDados.board == NULL) {
@@ -183,6 +186,8 @@ int _tmain(int argc, TCHAR* argv[]) {
 		ghEvents[1] = hThreadAtualizaMapa;
 		WaitForMultipleObjects(2, ghEvents, FALSE, INFINITE);
 	}
+
+	ReleaseSemaphore(hSemInstancias, 1, NULL);
 
 	return 0;
 }
