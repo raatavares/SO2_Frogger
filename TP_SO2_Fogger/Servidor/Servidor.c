@@ -149,6 +149,7 @@ DWORD WINAPI ThreadRow(LPVOID param) {
         WaitForSingleObject(dados->hMutex, INFINITE);
         if (!_tcscmp(dados->command, TEXT("restart"))) { reinicializaBoard(dados->board,dados->rows,dados->cols);dados->command[0] = '\0'; }
         ReleaseMutex(dados->hMutex);
+
         for (int i = 0; i < dados->cols; i++){
             //WaitForSingleObject(dados->hMutex, INFINITE);
 
@@ -222,6 +223,65 @@ DWORD WINAPI ThreadMapping(LPVOID param) {
 
     }
 }
+DWORD WINAPI ThreadBuffer(LPVOID param) {
+    pedido pedido;
+    buffer_circular* bufferData;
+    HANDLE hFileBuffer;
+    HANDLE hSemEscrita, hSemLeitura;
+    HANDLE hMutexBuffer;
+
+    hSemEscrita = CreateSemaphore(NULL, BUFFER_SIZE, BUFFER_SIZE, TEXT("TP_SEMAFORO_ESCRITA"));
+    hSemLeitura = CreateSemaphore(NULL, 0, BUFFER_SIZE, TEXT("TP_SEMAFORO_LEITURA"));
+    hMutexBuffer = CreateMutex(NULL, FALSE, TEXT("TP_MUTEX_CONSUMIDOR"));
+    if (hSemEscrita == NULL || hSemLeitura == NULL || hMutexBuffer == NULL) {
+        _tprintf(TEXT("Erro no CreateSemaphore ou no CreateMutex\n"));
+        return -1;
+    }
+
+
+    
+    hFileBuffer = CreateFileMapping(
+        INVALID_HANDLE_VALUE,
+        NULL,
+        PAGE_READWRITE,
+        0,
+        sizeof(buffer_circular), //tamanho da memoria partilhada
+        TEXT("TP_BufferCircular"));//nome do filemapping. nome que vai ser usado para partilha entre processos
+
+    if (hFileBuffer == NULL) {
+        _tprintf(TEXT("Erro no CreateFileMapping\n"));
+        return -1;
+    }
+
+    bufferData = (buffer_circular*)MapViewOfFile(hFileBuffer, FILE_MAP_ALL_ACCESS, 0, 0, 0);
+    if (bufferData == NULL) {
+        _tprintf(TEXT("Erro no MapViewOfFile\n"));
+        return -1;
+    }
+
+    bufferData->posE = 0;
+    bufferData->posL = 0;
+
+    while (1){
+        WaitForSingleObject(hSemLeitura, INFINITE);
+        WaitForSingleObject(hMutexBuffer, INFINITE);
+
+        CopyMemory(&pedido, &bufferData->pedidos[bufferData->posL], sizeof(pedido));
+        bufferData->posL++;
+
+        if (bufferData->posL == BUFFER_SIZE)
+            bufferData->posL = 0;
+
+        ReleaseMutex(hMutexBuffer);
+        ReleaseSemaphore(hSemEscrita, 1, NULL);
+
+        //Testar aqui se recebe correto
+        //Atençao que se nao aparecer nada 
+        //no ecra pode ser pelo system(cls) que limpa
+    }
+
+}
+
 
 int _tmain(int argc, TCHAR* argv[]) {
     mapping pDados;
@@ -237,7 +297,7 @@ int _tmain(int argc, TCHAR* argv[]) {
     TCHAR par_nome[TAM] = TEXT("velocidade");
     TCHAR command[TAM];
     DWORD par_valor;
-    HANDLE hRowThread[MAXFAIXAS],hUIThread,hMapThread; 
+    HANDLE hRowThread[MAXFAIXAS],hUIThread,hMapThread, hBufferThread;
     
     HINSTANCE hLib;
 
@@ -295,6 +355,17 @@ int _tmain(int argc, TCHAR* argv[]) {
     rows = numFaixas + 2;
 
     
+    //----- BUFFER ------
+    
+
+    hBufferThread = CreateThread(NULL, 0, ThreadBuffer, NULL, 0, NULL);
+    if (hBufferThread != NULL) {
+        _tprintf(TEXT("Problema com threadBuffer ...\n"));
+       
+    }
+
+
+
     //----- mapping -----
     pDados.hFileMap = CreateFileMapping(INVALID_HANDLE_VALUE,NULL,PAGE_READWRITE,0,sizeof(mapping),TEXT("TP_MEM_PART"));
     if (pDados.hFileMap == NULL) {
