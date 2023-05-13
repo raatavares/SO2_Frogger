@@ -23,6 +23,7 @@ typedef struct {
 	int rows, cols;
 	int faixaNumero, faixaVelocidade;
 	TCHAR* command;
+	int* TERMINAR;
 } data;
 
 typedef struct {
@@ -30,7 +31,7 @@ typedef struct {
 	int rows, cols, terminar;
 }matriz;
 typedef struct {
-	int TERMINAR;
+	int* TERMINAR;
 	data* jogo;
 	matriz* board;
 	HANDLE hFileMap;
@@ -50,6 +51,7 @@ typedef struct {
 	pedido pedidos[BUFFER_SIZE];
 	int posE; //proxima posicao de escrita
 	int posL; //proxima posicao de leitura
+	int* TERMINAR;
 } buffer_circular;
 
 //Mapping BufferCircular

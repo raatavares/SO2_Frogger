@@ -84,9 +84,10 @@ void reinicializaBoard(TCHAR** areaJogo,int numFaixas, int cols) {
 }
 
 DWORD WINAPI ThreadUI(LPVOID param) {
-    TCHAR* command = (TCHAR*)param;
+    data* dados = (data*)param;
     TCHAR i;
-  
+    TCHAR* command;
+    command = dados->command;
 
     do {
         //WaitForSingleObject(hMutex, INFINITE);
@@ -101,8 +102,10 @@ DWORD WINAPI ThreadUI(LPVOID param) {
 
         //ReleaseMutex(hMutex);
         
+        
 
-    } while (1);
+    } while (!dados->TERMINAR);
+
     ExitThread(0);
 
 }
@@ -195,7 +198,7 @@ DWORD WINAPI ThreadRow(LPVOID param) {
 
 
 
-    } while (1);
+    } while (!dados->TERMINAR);
     
 
     
@@ -236,7 +239,7 @@ DWORD WINAPI ThreadMapping(LPVOID param) {
 
         ResetEvent(dados->hEvent); //torna o evento novamente não assinalado
 
-    } while (1);
+    } while (!dados->TERMINAR);
     ExitThread(0);
 
 }
@@ -347,7 +350,7 @@ DWORD WINAPI ThreadBuffer(LPVOID param) {
         //Testar aqui se recebe correto
         //Atençao que se nao aparecer nada 
         //no ecra pode ser pelo system(cls) que limpa
-    } while (1);
+    } while (!dados->TERMINAR);
     ExitThread(0);
 
 
@@ -355,6 +358,7 @@ DWORD WINAPI ThreadBuffer(LPVOID param) {
 
 
 int _tmain(int argc, TCHAR* argv[]) {
+    int TERMINAR=0;
     mapping pDados;
     data dados[MAXFAIXAS];
     HKEY chave;
@@ -384,15 +388,15 @@ int _tmain(int argc, TCHAR* argv[]) {
         return 0;
     }
 
+    if (RegOpenKeyEx(HKEY_CURRENT_USER, chave_nome, 0, KEY_ALL_ACCESS, &chave) != ERROR_SUCCESS) {
+        _tprintf(TEXT("Coloque argumentos"));
+        return -1;
+    }
 
+
+    DWORD tamanho = sizeof(velocidade);
     if (argc < 3 ) {
-        if (RegOpenKeyEx(HKEY_CURRENT_USER, chave_nome, 0, KEY_ALL_ACCESS, &chave) != ERROR_SUCCESS) {
-            _tprintf(TEXT("Coloque argumentos"));
-            return -1;
-        }
-
-
-        DWORD tamanho = sizeof(velocidade);
+        
         if (RegQueryValueEx(chave, TEXT("velocidade"), NULL, NULL, (LPBYTE)&velocidade, &tamanho) == ERROR_SUCCESS)
             _tprintf(TEXT("Velocidade:%d\n"), velocidade);
         else
@@ -410,7 +414,21 @@ int _tmain(int argc, TCHAR* argv[]) {
     }else {
         numFaixas = _ttoi(argv[1]);// <faixas> <velocidade>
         velocidade = _ttoi(argv[2]);
+        DWORD Velocidade = velocidade;
         _tprintf(TEXT("\n numFaixas=%d,velocidade=%d "), numFaixas, velocidade);
+
+        if (RegSetValueEx(chave, TEXT("velocidade"), 0, REG_DWORD, (BYTE*)&Velocidade, sizeof(DWORD)) != ERROR_SUCCESS) {
+
+            RegCloseKey(chave);
+            return 1;
+        }
+        DWORD NumFaixas = numFaixas;
+
+        if (RegSetValueEx(chave, TEXT("faixas"), 0, REG_DWORD, (BYTE*)&NumFaixas, sizeof(DWORD)) != ERROR_SUCCESS) {
+
+            RegCloseKey(chave);
+            return 1;
+        }
 
     }
 
@@ -499,13 +517,14 @@ int _tmain(int argc, TCHAR* argv[]) {
         dados[i].rows = rows;
         dados[i].cols = cols;
         dados[i].faixaNumero = i+1;
-
+        dados[i].TERMINAR = TERMINAR;
         hRowThread[i] = CreateThread(NULL, 0, ThreadRow, &dados[i], 0, NULL);
     }
     Sleep(1000);
     SetEvent(hGlobalEvent);
-    hUIThread = CreateThread(NULL, 0, ThreadUI, &command, 0, NULL);
 
+    hUIThread = CreateThread(NULL, 0, ThreadUI, &dados, 0, NULL);
+    pDados.TERMINAR = TERMINAR;
     hMapThread = CreateThread(NULL, 0, ThreadMapping, &pDados, 0, NULL);
 
     
@@ -518,15 +537,31 @@ int _tmain(int argc, TCHAR* argv[]) {
         show(areaJogo, rows - 2, cols);
         if (!_tcscmp(dados->command, TEXT("para")))     _tprintf(TEXT("\nPressione uma tecla para retomar jogo:\n"));
         else    _tprintf(TEXT("\nEscreva comando:\n"));
+        WaitForSingleObject(dados->hMutex, INFINITE);
+        if (!_tcscmp(dados->command, TEXT("sair"))) {
+            _tprintf(TEXT("\nSaindo...\n"));
+            TERMINAR = 1;
+        }
+        ReleaseMutex(dados->hMutex);
 
         
 
         
         Sleep(100);
         
-    } while (1);
+    } while (!TERMINAR);
+    
 
-    WaitForMultipleObjects(2, hRowThread, FALSE, INFINITE);
+    WaitForMultipleObjects(numFaixas, hRowThread, FALSE, INFINITE);
+    _tprintf(TEXT("\Movimento Saindo...\n"));
+    WaitForSingleObject(hUIThread, INFINITE);
+    _tprintf(TEXT("\nUI Saindo...\n"));
+    WaitForSingleObject(hMapThread, INFINITE);
+    _tprintf(TEXT("\MAp Saindo...\n"));
+    WaitForSingleObject(hBufferThread, INFINITE);
+    _tprintf(TEXT("\BUFFER Saindo...\n"));
+
+
 
 
 
@@ -535,6 +570,9 @@ int _tmain(int argc, TCHAR* argv[]) {
     UnmapViewOfFile(pDados.board);
     for (int i = 0;i < numFaixas;i++)
         CloseHandle(hRowThread[i]);
+    CloseHandle(hUIThread);
+    CloseHandle(hMapThread);
+    CloseHandle(hBufferThread);
 
     for (int i = 0; i < (numFaixas + 2); i++) {
         free(areaJogo[i]);
