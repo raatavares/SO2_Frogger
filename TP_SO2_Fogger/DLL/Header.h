@@ -27,7 +27,7 @@ typedef struct {
 
 typedef struct {
 	TCHAR board[10][20];
-	int rows, cols;
+	int rows, cols, terminar;
 }matriz;
 typedef struct {
 	int TERMINAR;

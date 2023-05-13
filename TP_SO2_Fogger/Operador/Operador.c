@@ -75,8 +75,19 @@ DWORD WINAPI ThreadComandos(LPVOID param) {
 	int seg, pista;
 	pedido pedidoN;
 
-	buffer = (buffer_circular*)malloc(sizeof(buffer_circular));
-	inicializaBuffer(buffer);
+	//buffer = (buffer_circular*)malloc(sizeof(buffer_circular));
+	//inicializaBuffer(buffer);
+	HANDLE hFileBuffer = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, TEXT("TP_BufferCircular"));
+
+	if (hFileBuffer == NULL) {
+		_tprintf(TEXT("Erro no CreateFileMapping\n"));
+		return;
+	}
+	buffer = (buffer_circular*)MapViewOfFile(hFileBuffer, FILE_MAP_ALL_ACCESS, 0, 0, 0);
+	if (buffer == NULL) {
+		_tprintf(TEXT("Erro no MapViewOfFile\n"));
+		return;
+	}
 	hSemEscrita = CreateSemaphore(NULL, BUFFER_SIZE, BUFFER_SIZE, TEXT("TP_SEMAFORO_ESCRITA"));
 	if (hSemEscrita == NULL) {
 		_tprintf(TEXT("Erro no CreateSemaphore\n"));
@@ -87,30 +98,41 @@ DWORD WINAPI ThreadComandos(LPVOID param) {
 		_tprintf(TEXT("Erro no CreateSemaphore\n"));
 		return 0;
 	}
-	buffer->posE = 0;
-	buffer->posL = 0;
+	
 
 	do {
+		
+
+		
+			
+		
+
+		WaitForSingleObject(hSemEscrita, INFINITE);
+		WaitForSingleObject(hMutex, INFINITE);
+
 		_tprintf(_T("\n\n"));
 		fflush(stdin);
 		_fgetts(op, sizeof(op) / sizeof(TCHAR), stdin);
-		WaitForSingleObject(hMutex, INFINITE);
-		WaitForSingleObject(hSemEscrita, INFINITE);
-		op[_tcslen(op) - 1] = '\0';
 
+
+		op[_tcslen(op) - 1] = '\0';
 		if (!_tcscmp(op, TEXT("para"))) {
 			do {
 				_tprintf(_T("\n[COMANDO] Introduza os segundos: "));
-				_tscanf_s(_T("%d"), &seg);
-			} while (seg <= 0);
-			buffer->pedidos[buffer->posE].paraMovimento = 1;
-			buffer->pedidos[buffer->posE].segundosParar = seg;
-			//CopyMemory(&buffer->pedidos[buffer->posE], &pedidoN, sizeof(pedido));
+				_tscanf_s(_T("%d"), &pedidoN.segundosParar);
+			} while (pedidoN.segundosParar <= 0);
+			pedidoN.paraMovimento = 1;
+			pedidoN.inverteSentido = 0;
+			pedidoN.insereObstaculo = 0;
+			CopyMemory(&buffer->pedidos[buffer->posE], &pedidoN, sizeof(pedido));
+
 			buffer->posE = (buffer->posE + 1) % BUFFER_SIZE;  // Avança a posição de escrita no buffer circular
 		}
 		else if (!_tcscmp(op, TEXT("obstaculo"))) {
-			buffer->pedidos[buffer->posE].insereObstaculo = 1;
-			//CopyMemory(&buffer->pedidos[buffer->posE], &pedidoN, sizeof(pedido));
+			pedidoN.insereObstaculo = 1;
+			pedidoN.paraMovimento = 0;
+			pedidoN.inverteSentido = 0;
+			CopyMemory(&buffer->pedidos[buffer->posE], &pedidoN, sizeof(pedido));
 			buffer->posE = (buffer->posE + 1) % BUFFER_SIZE;  // Avança a posição de escrita no buffer circular
 		}
 		else if (!_tcscmp(op, TEXT("inverte"))) {
@@ -119,20 +141,22 @@ DWORD WINAPI ThreadComandos(LPVOID param) {
 				_tscanf_s(_T("%d"), &pista);
 			} while (pista < 0);
 			_tprintf(_T("\nRR"));
-			buffer->pedidos[buffer->posE].inverteSentido = 1;
+			pedidoN.inverteSentido = pista;
+			pedidoN.paraMovimento = 0;
+			pedidoN.insereObstaculo = 0;
 			_tprintf(_T("\n2"));
-			buffer->pedidos[buffer->posE].pistaInverter = pista;
+			pedidoN.pistaInverter = pista;
 			_tprintf(_T("\n3"));
-			//CopyMemory(&buffer->pedidos[buffer->posE], &pedidoN, sizeof(pedido));
+			CopyMemory(&buffer->pedidos[buffer->posE], &pedidoN, sizeof(pedido));
 			buffer->posE = (buffer->posE + 1) % BUFFER_SIZE;  // Avança a posição de escrita no buffer circular
 		}
 		else if (!_tcscmp(op, TEXT("ajuda"))) {
 			_tprintf(_T("\n[COMANDO] Aqui vai uma ajuda..."));
 			ajuda();
 		}
+		ReleaseMutex(hMutex);
 
 		ReleaseSemaphore(hSemLeitura, 1, NULL);
-		ReleaseMutex(hMutex);
 
 		_tprintf(_T("\n\n"));
 	} while (_tcscmp(op, TEXT("fim")));

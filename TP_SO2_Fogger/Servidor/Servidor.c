@@ -1,7 +1,10 @@
 #include "Servidor.h"
 #include "..\\DLL\Header.h"
-//com mutex
 
+int gerarAleatorio(int minimo, int maximo) {
+    int intervalo = maximo - minimo + 1;
+    return rand() % intervalo + minimo;
+}
 void show(TCHAR** board, int numFaixas, int cols){
 _tprintf(TEXT("\n"));
 
@@ -100,6 +103,8 @@ DWORD WINAPI ThreadUI(LPVOID param) {
         
 
     } while (1);
+    ExitThread(0);
+
 }
 
 DWORD WINAPI ThreadRow(LPVOID param) {
@@ -149,13 +154,15 @@ DWORD WINAPI ThreadRow(LPVOID param) {
         WaitForSingleObject(dados->hMutex, INFINITE);
         if (!_tcscmp(dados->command, TEXT("restart"))) { reinicializaBoard(dados->board,dados->rows,dados->cols);dados->command[0] = '\0'; }
         ReleaseMutex(dados->hMutex);
-        
+
+        WaitForSingleObject(dados->hMutex, INFINITE);
         for (int i = 0; i < dados->cols; i++){
             //WaitForSingleObject(dados->hMutex, INFINITE);
 
 
             
             if (dados->board[dados->faixaNumero][i] == TEXT('<')) {
+                if (dados->board[dados->faixaNumero][i-1] == TEXT('X')|| dados->board[dados->faixaNumero][i-1] == TEXT('<')) continue;
                 dados->board[dados->faixaNumero][i] = TEXT(' ');
                 if (i == 0)   dados->board[dados->faixaNumero][dados->cols - 1] = TEXT('<');
                 else   dados->board[dados->faixaNumero][i - 1] = TEXT('<');
@@ -171,6 +178,8 @@ DWORD WINAPI ThreadRow(LPVOID param) {
         for (int l = dados->cols; l >= 0; l--) {
 
             if (dados->board[dados->faixaNumero][l] == TEXT('>')) {
+                if (dados->board[dados->faixaNumero][l + 1] == TEXT('X') || dados->board[dados->faixaNumero][l + 1] == TEXT('>')) continue;
+
                 dados->board[dados->faixaNumero][l] = TEXT(' ');
                 if (l == dados->cols - 1)   dados->board[dados->faixaNumero][0] = TEXT('>');
                 else   dados->board[dados->faixaNumero][l + 1] = TEXT('>');
@@ -179,6 +188,8 @@ DWORD WINAPI ThreadRow(LPVOID param) {
 
             }
         }
+        ReleaseMutex(dados->hMutex);
+
         Sleep(dados->faixaVelocidade);
         
 
@@ -188,6 +199,7 @@ DWORD WINAPI ThreadRow(LPVOID param) {
     
 
     
+    ExitThread(0);
 
     
 
@@ -200,7 +212,7 @@ DWORD WINAPI ThreadMapping(LPVOID param) {
     matriz dadosPassados;
 
 
-    while (1) {
+    do {
         WaitForSingleObject(dados->hMutex, INFINITE);
         
         ZeroMemory(dados->board, sizeof(matriz));
@@ -224,14 +236,19 @@ DWORD WINAPI ThreadMapping(LPVOID param) {
 
         ResetEvent(dados->hEvent); //torna o evento novamente não assinalado
 
-    }
+    } while (1);
+    ExitThread(0);
+
 }
 DWORD WINAPI ThreadBuffer(LPVOID param) {
-    pedido pedido;
+    data* dados = (data*)param;
+
+    pedido pedidos;
     buffer_circular* bufferData;
     HANDLE hMutexBuffer;
 
-    bufferData = (buffer_circular*)malloc(sizeof(buffer_circular));
+    //bufferData = (buffer_circular*)malloc(sizeof(buffer_circular));
+
 
     hMutexBuffer = CreateMutex(NULL, FALSE, TEXT("TP_MUTEX_CONSUMIDOR"));
     if (hMutexBuffer == NULL) {
@@ -239,7 +256,18 @@ DWORD WINAPI ThreadBuffer(LPVOID param) {
         return -1;
     }
 
-    inicializaBuffer(bufferData);
+    //inicializaBuffer(bufferData);
+    HANDLE hFileBuffer = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(buffer_circular), TEXT("TP_BufferCircular"));
+
+    if (hFileBuffer == NULL) {
+        _tprintf(TEXT("Erro no CreateFileMapping\n"));
+        return;
+    }
+    bufferData = (buffer_circular*)MapViewOfFile(hFileBuffer, FILE_MAP_ALL_ACCESS, 0, 0, 0);
+    if (bufferData == NULL) {
+        _tprintf(TEXT("Erro no MapViewOfFile\n"));
+        return;
+    }
     hSemEscrita = CreateSemaphore(NULL, BUFFER_SIZE, BUFFER_SIZE, TEXT("TP_SEMAFORO_ESCRITA"));
     if (hSemEscrita == NULL) {
         _tprintf(TEXT("Erro no CreateSemaphore\n"));
@@ -250,24 +278,78 @@ DWORD WINAPI ThreadBuffer(LPVOID param) {
         _tprintf(TEXT("Erro no CreateSemaphore\n"));
         return;
     }
+    bufferData->posE = 0;
+    bufferData->posL = 0;
+    
+    
+    do{
 
-    while (1){
+
+
         WaitForSingleObject(hSemLeitura, INFINITE);
-        WaitForSingleObject(hMutexBuffer, INFINITE);
+        //WaitForSingleObject(hMutexBuffer, INFINITE);
 
-        CopyMemory(&pedido, &bufferData->pedidos[bufferData->posL], sizeof(pedido));
-        bufferData->posL++;
+        CopyMemory(&pedidos, &bufferData->pedidos[bufferData->posL], sizeof(pedido));
+
+        //_tprintf(TEXT("\n(%d)%d %d\n"),bufferData->posL, pedidos.paraMovimento, pedidos.segundosParar);
+        if (pedidos.paraMovimento){
+            WaitForSingleObject(dados->hMutex,pedidos.segundosParar);
+            _tprintf(TEXT("\n(%d)Movimento parado por %ds\n"), bufferData->posL, pedidos.segundosParar);
+            Sleep(pedidos.segundosParar * 1000);
+            bufferData->posL++;
+            ReleaseMutex(dados->hMutex);
+        }
+        else if (pedidos.inverteSentido) {
+            _tprintf(TEXT("\n(%d)Inverte sentido da pista %d\n"), bufferData->posL, pedidos.pistaInverter);
+            WaitForSingleObject(dados->hMutex, pedidos.segundosParar);
+            for (int i = 0; i < dados[pedidos.pistaInverter].cols; i++)
+            {
+                if (dados[pedidos.pistaInverter].board[pedidos.pistaInverter][i] == TEXT('<')) {
+                    dados->board[pedidos.pistaInverter][i] = TEXT('>');
+
+                }else if(dados[pedidos.pistaInverter].board[pedidos.pistaInverter][i] == TEXT('>')){
+                    dados->board[pedidos.pistaInverter][i] = TEXT('<');
+                }
+
+            }
+            bufferData->posL++;
+            ReleaseMutex(dados->hMutex);
+
+        }
+        else if (pedidos.insereObstaculo) {
+            int x, y;
+            _tprintf(TEXT("\n(%d)Obstáculo inserido\n"), bufferData->posL);
+            WaitForSingleObject(dados->hMutex, pedidos.segundosParar);
+            do {
+                x = gerarAleatorio(1, dados->rows - 2);
+                y = gerarAleatorio(3, dados->cols - 4);
+            } while (dados->board[x][y] != TEXT(' '));
+
+            dados->board[x][y] = TEXT('X');
+
+            bufferData->posL++;
+            ReleaseMutex(dados->hMutex);
+
+        }
+
 
         if (bufferData->posL == BUFFER_SIZE)
             bufferData->posL = 0;
+        
 
-        ReleaseMutex(hMutexBuffer);
+        //ReleaseMutex(hMutexBuffer);
         ReleaseSemaphore(hSemEscrita, 1, NULL);
+        
+        Sleep(1000);
+
+      
 
         //Testar aqui se recebe correto
         //Atençao que se nao aparecer nada 
         //no ecra pode ser pelo system(cls) que limpa
-    }
+    } while (1);
+    ExitThread(0);
+
 
 }
 
@@ -338,8 +420,8 @@ int _tmain(int argc, TCHAR* argv[]) {
     //----- BUFFER ------
     
 
-    hBufferThread = CreateThread(NULL, 0, ThreadBuffer, NULL, 0, NULL);
-    if (hBufferThread != NULL) {
+    hBufferThread = CreateThread(NULL, 0, ThreadBuffer, &dados, 0, NULL);
+    if (hBufferThread == NULL) {
         _tprintf(TEXT("Problema com threadBuffer ...\n"));
        
     }

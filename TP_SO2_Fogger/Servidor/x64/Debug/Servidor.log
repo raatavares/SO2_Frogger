@@ -1,8 +1,10 @@
 ﻿  Servidor.c
-C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(246,9): warning C4033: 'ThreadBuffer' deve retornar um valor
-C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(251,9): warning C4033: 'ThreadBuffer' deve retornar um valor
-C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(400,44): warning C4020: 'CreateMutexW': muitos parâmetros reais
-C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(288,11): warning C4101: 'par_valor': variável local não referenciada
-C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(279,11): warning C4101: 'resultado': variável local não referenciada
-C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(272): warning C4715: 'ThreadBuffer': nem todos os caminhos de controle retornam um valor
-  Servidor.vcxproj -> C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\x64\Debug\Servidor.exe
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(264,9): warning C4033: 'ThreadBuffer' deve retornar um valor
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(269,9): warning C4033: 'ThreadBuffer' deve retornar um valor
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(274,9): warning C4033: 'ThreadBuffer' deve retornar um valor
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(279,9): warning C4033: 'ThreadBuffer' deve retornar um valor
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(482,44): warning C4020: 'CreateMutexW': muitos parâmetros reais
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(370,11): warning C4101: 'par_valor': variável local não referenciada
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(361,11): warning C4101: 'resultado': variável local não referenciada
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(354): warning C4715: 'ThreadBuffer': nem todos os caminhos de controle retornam um valor
+  Servidor.vcxproj -> C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\x64\Debug\Servidor.exe
