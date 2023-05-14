@@ -1,15 +1,14 @@
 ﻿  Servidor.c
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(267,9): warning C4033: 'ThreadBuffer' deve retornar um valor
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(272,9): warning C4033: 'ThreadBuffer' deve retornar um valor
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(277,9): warning C4033: 'ThreadBuffer' deve retornar um valor
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(282,9): warning C4033: 'ThreadBuffer' deve retornar um valor
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(500,44): warning C4020: 'CreateMutexW': muitos parâmetros reais
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(520,37): warning C4047: '=': 'int *' difere em níveis de indireção de 'int'
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(527,31): warning C4047: '=': 'int *' difere em níveis de indireção de 'int'
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(556,14): warning C4129: 'M': sequência de escape de caractere não reconhecida
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(560,14): warning C4129: 'M': sequência de escape de caractere não reconhecida
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(562,14): warning C4129: 'B': sequência de escape de caractere não reconhecida
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(374,11): warning C4101: 'par_valor': variável local não referenciada
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(365,11): warning C4101: 'resultado': variável local não referenciada
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(357): warning C4715: 'ThreadBuffer': nem todos os caminhos de controle retornam um valor
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(236,30): warning C4047: '=': 'int' difere em níveis de indireção de 'int *'
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(217,11): warning C4101: 'limpeza': variável local não referenciada
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(278,9): warning C4033: 'ThreadBuffer' deve retornar um valor
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(283,9): warning C4033: 'ThreadBuffer' deve retornar um valor
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(288,9): warning C4033: 'ThreadBuffer' deve retornar um valor
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(293,9): warning C4033: 'ThreadBuffer' deve retornar um valor
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(508,44): warning C4020: 'CreateMutexW': muitos parâmetros reais
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(528,37): warning C4047: '=': 'int *' difere em níveis de indireção de 'int'
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(535,31): warning C4047: '=': 'int *' difere em níveis de indireção de 'int'
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(388,11): warning C4101: 'par_valor': variável local não referenciada
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(379,11): warning C4101: 'resultado': variável local não referenciada
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(371): warning C4715: 'ThreadBuffer': nem todos os caminhos de controle retornam um valor
   Servidor.vcxproj -> C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\x64\Debug\Servidor.exe

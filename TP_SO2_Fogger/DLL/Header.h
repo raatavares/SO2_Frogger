@@ -37,6 +37,7 @@ typedef struct {
 	HANDLE hFileMap;
 	HANDLE hEvent;
 	HANDLE hMutex;
+	TCHAR* command;
 } mapping; //struct para mapping
 
 //Semaforo AtualizaMapa

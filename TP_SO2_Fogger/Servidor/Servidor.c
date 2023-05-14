@@ -90,21 +90,20 @@ DWORD WINAPI ThreadUI(LPVOID param) {
     command = dados->command;
 
     do {
-        //WaitForSingleObject(hMutex, INFINITE);
+        
         
 
         i = _gettch();
         _tprintf(_T("%c"), i);
         command[0] = i;
         _fgetts(&command[1], sizeof(command), stdin);
-        command[_tcslen(command) - 1] = '\0';
+        command[_tcslen(command) - 1] = TEXT('\0');
         _tprintf(_T("%s"), command);
-
-        //ReleaseMutex(hMutex);
         
         
+        
 
-    } while (!dados->TERMINAR);
+    } while (_tcscmp(dados->command, TEXT("sair")));
 
     ExitThread(0);
 
@@ -194,11 +193,12 @@ DWORD WINAPI ThreadRow(LPVOID param) {
         ReleaseMutex(dados->hMutex);
 
         Sleep(dados->faixaVelocidade);
+
         
 
 
 
-    } while (!dados->TERMINAR);
+    } while (_tcscmp(dados->command, TEXT("sair")));
     
 
     
@@ -211,14 +211,17 @@ DWORD WINAPI ThreadRow(LPVOID param) {
 
 }
 DWORD WINAPI ThreadMapping(LPVOID param) {
+    int fim;
     mapping* dados = (mapping*)param;
     matriz dadosPassados;
+    TCHAR limpeza[20];
 
-
+    
     do {
         WaitForSingleObject(dados->hMutex, INFINITE);
         
         ZeroMemory(dados->board, sizeof(matriz));
+        dadosPassados.terminar = 1;
         dadosPassados.rows = dados->jogo->rows;
         dadosPassados.cols = dados->jogo->cols;
         for (int i = 0; i < dados->jogo->rows; i++) {
@@ -226,20 +229,28 @@ DWORD WINAPI ThreadMapping(LPVOID param) {
                 dadosPassados.board[i][j] = dados->jogo->board[i][j];
             }
         }
+        if (!_tcscmp(dados->command, TEXT("sair"))) dadosPassados.terminar = 0;
+        
+        
         CopyMemory(dados->board, &dadosPassados,sizeof(matriz));
-
+        fim = dados->TERMINAR;
         ReleaseMutex(dados->hMutex);
 
-        //Semaforo Atualiza Mapa
         ReleaseSemaphore(hSemAtualizaMapa, 1, NULL);
 
-        //criamos evento
         SetEvent(dados->hEvent);
         Sleep(500);
 
-        ResetEvent(dados->hEvent); //torna o evento novamente não assinalado
+        ResetEvent(dados->hEvent); 
+        if (_tcscmp(dados->command, TEXT("sair"))){
+            ;
+        }
+        
+    } while (_tcscmp(dados->command, TEXT("sair")));
+    
 
-    } while (!dados->TERMINAR);
+    dadosPassados.terminar = 0;
+    CopyMemory(dados->board, &dadosPassados, sizeof(matriz));
     ExitThread(0);
 
 }
@@ -284,9 +295,8 @@ DWORD WINAPI ThreadBuffer(LPVOID param) {
     bufferData->posE = 0;
     bufferData->posL = 0;
     
-    
-    do{
-
+    while (1) {
+        
 
 
         WaitForSingleObject(hSemLeitura, INFINITE);
@@ -334,12 +344,15 @@ DWORD WINAPI ThreadBuffer(LPVOID param) {
             ReleaseMutex(dados->hMutex);
 
         }
+        
 
 
         if (bufferData->posL == BUFFER_SIZE)
             bufferData->posL = 0;
         
-
+        
+            
+        
         //ReleaseMutex(hMutexBuffer);
         ReleaseSemaphore(hSemEscrita, 1, NULL);
         
@@ -350,7 +363,8 @@ DWORD WINAPI ThreadBuffer(LPVOID param) {
         //Testar aqui se recebe correto
         //Atençao que se nao aparecer nada 
         //no ecra pode ser pelo system(cls) que limpa
-    } while (!dados->TERMINAR);
+    } 
+   
     ExitThread(0);
 
 
@@ -435,14 +449,7 @@ int _tmain(int argc, TCHAR* argv[]) {
     rows = numFaixas + 2;
 
     
-    //----- BUFFER ------
     
-
-    hBufferThread = CreateThread(NULL, 0, ThreadBuffer, &dados, 0, NULL);
-    if (hBufferThread == NULL) {
-        _tprintf(TEXT("Problema com threadBuffer ...\n"));
-       
-    }
 
 
 
@@ -459,6 +466,7 @@ int _tmain(int argc, TCHAR* argv[]) {
         CloseHandle(pDados.hFileMap);
         return 1;
     }
+    pDados.command = command;
 
     pDados.hEvent = CreateEvent(
         NULL,
@@ -526,11 +534,19 @@ int _tmain(int argc, TCHAR* argv[]) {
     hUIThread = CreateThread(NULL, 0, ThreadUI, &dados, 0, NULL);
     pDados.TERMINAR = TERMINAR;
     hMapThread = CreateThread(NULL, 0, ThreadMapping, &pDados, 0, NULL);
+    //----- BUFFER ------
+
+
+    hBufferThread = CreateThread(NULL, 0, ThreadBuffer, &dados, 0, NULL);
+    if (hBufferThread == NULL) {
+        _tprintf(TEXT("Problema com threadBuffer ...\n"));
+
+    }
 
     
     
     
-
+    int fim;
     do {
         //WaitForSingleObject(hMutex, INFINITE);
         system("cls");
@@ -539,27 +555,28 @@ int _tmain(int argc, TCHAR* argv[]) {
         else    _tprintf(TEXT("\nEscreva comando:\n"));
         WaitForSingleObject(dados->hMutex, INFINITE);
         if (!_tcscmp(dados->command, TEXT("sair"))) {
-            _tprintf(TEXT("\nSaindo...\n"));
+            _tprintf(TEXT("\nSaíndo..."));
             TERMINAR = 1;
         }
+        fim = TERMINAR;
         ReleaseMutex(dados->hMutex);
 
         
-
         
         Sleep(100);
         
-    } while (!TERMINAR);
+    } while (!fim);
     
+    TerminateThread(hBufferThread, 0);
 
     WaitForMultipleObjects(numFaixas, hRowThread, FALSE, INFINITE);
-    _tprintf(TEXT("\Movimento Saindo...\n"));
+    _tprintf(TEXT("\nMovimento Saindo..."));
     WaitForSingleObject(hUIThread, INFINITE);
-    _tprintf(TEXT("\nUI Saindo...\n"));
+    _tprintf(TEXT("\nUI Saindo..."));
     WaitForSingleObject(hMapThread, INFINITE);
-    _tprintf(TEXT("\MAp Saindo...\n"));
+    _tprintf(TEXT("\nMAp Saindo..."));
     WaitForSingleObject(hBufferThread, INFINITE);
-    _tprintf(TEXT("\BUFFER Saindo...\n"));
+    _tprintf(TEXT("\nBUFFER Saindo..."));
 
 
 

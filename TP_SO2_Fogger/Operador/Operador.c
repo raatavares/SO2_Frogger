@@ -43,10 +43,14 @@ void leMapa(mapping* pDados) {
 
 DWORD WINAPI ThreadAtualizaMapa(LPVOID param) {
 	mapping* pDados = ((mapping*)param);
+	pDados->board->terminar = 1;
+	while (pDados->board->terminar) {
+		//_tprintf(TEXT("[%d]"), pDados->board->terminar);
 
-	while (!pDados->TERMINAR) {
 		WaitForSingleObject(hSemAtualizaMapa, INFINITE);
 		WaitForSingleObject(hMutex, INFINITE);
+		
+
 		_tprintf(TEXT("\n"));
 		for (int i = 0; i < pDados->board->rows; i++) {
 			for (int j = 0; j < pDados->board->cols; j++) {
@@ -57,6 +61,7 @@ DWORD WINAPI ThreadAtualizaMapa(LPVOID param) {
 		ReleaseMutex(hMutex);
 		Sleep(1000);
 	};
+	//_tprintf(TEXT("[%d]"), pDados->board->terminar);
 
 	ExitThread(0);
 }
@@ -205,10 +210,14 @@ int _tmain(int argc, TCHAR* argv[]) {
 			return 0;
 		}
 
-		HANDLE ghEvents[2];
+		/*HANDLE ghEvents[2];
 		ghEvents[0] = hThreadComandos;
 		ghEvents[1] = hThreadAtualizaMapa;
-		WaitForMultipleObjects(2, ghEvents, FALSE, INFINITE);
+		WaitForMultipleObjects(2, ghEvents, FALSE, INFINITE);*/
+		WaitForSingleObject(hThreadAtualizaMapa, INFINITE);
+		TerminateThread(hThreadComandos, 0);
+		WaitForSingleObject(hThreadComandos, INFINITE);
+
 	}
 
 	ReleaseSemaphore(hSemInstancias, 1, NULL);
