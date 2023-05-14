@@ -398,11 +398,11 @@ int _tmain(int argc, TCHAR* argv[]) {
 
     hOneServer = CreateMutex(NULL, TRUE, _T("OneServer"));
     if (GetLastError() == ERROR_ALREADY_EXISTS) {
-        printf("Ja existe uma instancia do servidor em execucao.\n");
+        printf("Ja existe uma instancia do servidor em execução.\n");
         return 0;
     }
-
-    if (RegOpenKeyEx(HKEY_CURRENT_USER, chave_nome, 0, KEY_ALL_ACCESS, &chave) != ERROR_SUCCESS) {
+    DWORD tipo;
+    if (RegCreateKeyEx(HKEY_CURRENT_USER, chave_nome, 0,NULL,REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS,NULL, &chave,&tipo) != ERROR_SUCCESS) {
         _tprintf(TEXT("Coloque argumentos"));
         return -1;
     }
@@ -513,8 +513,8 @@ int _tmain(int argc, TCHAR* argv[]) {
 
     areaJogo = createBoard(numFaixas, cols);
     
-    if(!putSapo(areaJogo, numFaixas, cols)) _tprintf(TEXT("\nNao ha espaço "));
-    if (!putSapo(areaJogo, numFaixas, cols)) _tprintf(TEXT("\nNao ha espaço "));
+    if(!putSapo(areaJogo, numFaixas, cols)) _tprintf(TEXT("\nNão há espaço "));
+    if (!putSapo(areaJogo, numFaixas, cols)) _tprintf(TEXT("\nNão há espaço "));
 
     for (int i = 0;i < numFaixas;i++) {
         dados[i].command = command;
@@ -555,7 +555,7 @@ int _tmain(int argc, TCHAR* argv[]) {
         else    _tprintf(TEXT("\nEscreva comando:\n"));
         WaitForSingleObject(dados->hMutex, INFINITE);
         if (!_tcscmp(dados->command, TEXT("sair"))) {
-            _tprintf(TEXT("\nSaíndo..."));
+            _tprintf(TEXT("\nSaindo..."));
             TERMINAR = 1;
         }
         fim = TERMINAR;
@@ -570,13 +570,9 @@ int _tmain(int argc, TCHAR* argv[]) {
     TerminateThread(hBufferThread, 0);
 
     WaitForMultipleObjects(numFaixas, hRowThread, FALSE, INFINITE);
-    _tprintf(TEXT("\nMovimento Saindo..."));
     WaitForSingleObject(hUIThread, INFINITE);
-    _tprintf(TEXT("\nUI Saindo..."));
     WaitForSingleObject(hMapThread, INFINITE);
-    _tprintf(TEXT("\nMAp Saindo..."));
     WaitForSingleObject(hBufferThread, INFINITE);
-    _tprintf(TEXT("\nBUFFER Saindo..."));
 
 
 
