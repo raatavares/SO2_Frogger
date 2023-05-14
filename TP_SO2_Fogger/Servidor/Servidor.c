@@ -100,7 +100,9 @@ DWORD WINAPI ThreadUI(LPVOID param) {
         command[_tcslen(command) - 1] = TEXT('\0');
         _tprintf(_T("%s"), command);
         
-        
+        WaitForSingleObject(dados->hMutex, INFINITE);
+        if (!_tcscmp(dados->command, TEXT("restart"))) { reinicializaBoard(dados->board, dados->rows, dados->cols);dados->command[0] = '\0'; }
+        ReleaseMutex(dados->hMutex);
         
 
     } while (_tcscmp(dados->command, TEXT("sair")));
@@ -153,9 +155,7 @@ DWORD WINAPI ThreadRow(LPVOID param) {
     do {
         if (_tcscmp(dados->command, TEXT("para")));
         else continue;
-        WaitForSingleObject(dados->hMutex, INFINITE);
-        if (!_tcscmp(dados->command, TEXT("restart"))) { reinicializaBoard(dados->board,dados->rows,dados->cols);dados->command[0] = '\0'; }
-        ReleaseMutex(dados->hMutex);
+        
 
         WaitForSingleObject(dados->hMutex, INFINITE);
         for (int i = 0; i < dados->cols; i++){
