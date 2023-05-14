@@ -1,7 +1,7 @@
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN             // Excluir itens raramente utilizados dos cabeçalhos do Windows
-// Arquivos de Cabeçalho do Windows
+#define WIN32_LEAN_AND_MEAN             // Excluir itens raramente utilizados dos cabeï¿½alhos do Windows
+// Arquivos de Cabeï¿½alho do Windows
 #include <windows.h>
 #include <tchar.h>
 #include <fcntl.h>
@@ -30,6 +30,7 @@ typedef struct {
 	TCHAR board[10][20];
 	int rows, cols, terminar;
 }matriz;
+
 typedef struct {
 	int* TERMINAR;
 	data* jogo;
@@ -66,4 +67,6 @@ HANDLE hSemEscrita, hSemLeitura;
 #define DLL_API __declspec(dllimport)//import
 #endif
 
-extern DLL_API void inicializaBuffer(buffer_circular* buffer);
+extern DLL_API void escritaBufferCircular(buffer_circular* buffer, pedido* pedidoN);
+extern DLL_API void leituraBufferCircular(buffer_circular* buffer, pedido* pedidoN);
+extern DLL_API void imprimeMapa(mapping* pDados);

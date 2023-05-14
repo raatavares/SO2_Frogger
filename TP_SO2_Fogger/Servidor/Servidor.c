@@ -5,17 +5,7 @@ int gerarAleatorio(int minimo, int maximo) {
     int intervalo = maximo - minimo + 1;
     return rand() % intervalo + minimo;
 }
-void show(TCHAR** board, int numFaixas, int cols){
-_tprintf(TEXT("\n"));
 
-    for (int i = 0; i < (numFaixas + 2); i++) {
-        _tprintf(TEXT("\n"));
-
-        for (int j = 0; j < cols; j++) {
-            _tprintf(TEXT("%c"), board[i][j]);
-        }
-    }
-}
 BOOL putSapo(TCHAR** board, int numFaixas, int cols) {
     int pos;
     BOOL foundPlace = FALSE,temEspaco=FALSE;
@@ -32,11 +22,10 @@ BOOL putSapo(TCHAR** board, int numFaixas, int cols) {
             board[numFaixas + 1][pos] = TEXT('S');
             foundPlace = TRUE;
         }
-        
-
     }
     return TRUE;
 }
+
 TCHAR** createBoard(int numFaixas,int cols) {
     TCHAR** areaJogo = (TCHAR**)malloc((numFaixas + 2) * sizeof(TCHAR*));
     for (int i = 0; i < (numFaixas + 2); i++) {
@@ -57,6 +46,7 @@ TCHAR** createBoard(int numFaixas,int cols) {
     }
     return areaJogo;
 }
+
 void reinicializaBoard(TCHAR** areaJogo,int numFaixas, int cols) {
     for (int i = 1; i < numFaixas-1 ; i++) {
 
@@ -90,9 +80,6 @@ DWORD WINAPI ThreadUI(LPVOID param) {
     command = dados->command;
 
     do {
-        
-        
-
         i = _gettch();
         _tprintf(_T("%c"), i);
         command[0] = i;
@@ -103,12 +90,10 @@ DWORD WINAPI ThreadUI(LPVOID param) {
         WaitForSingleObject(dados->hMutex, INFINITE);
         if (!_tcscmp(dados->command, TEXT("restart"))) { reinicializaBoard(dados->board, dados->rows, dados->cols);dados->command[0] = '\0'; }
         ReleaseMutex(dados->hMutex);
-        
 
     } while (_tcscmp(dados->command, TEXT("sair")));
 
     ExitThread(0);
-
 }
 
 DWORD WINAPI ThreadRow(LPVOID param) {
@@ -155,25 +140,17 @@ DWORD WINAPI ThreadRow(LPVOID param) {
     do {
         if (_tcscmp(dados->command, TEXT("para")));
         else continue;
-        
 
         WaitForSingleObject(dados->hMutex, INFINITE);
         for (int i = 0; i < dados->cols; i++){
             //WaitForSingleObject(dados->hMutex, INFINITE);
 
-
-            
             if (dados->board[dados->faixaNumero][i] == TEXT('<')) {
                 if (dados->board[dados->faixaNumero][i-1] == TEXT('X')|| dados->board[dados->faixaNumero][i-1] == TEXT('<')) continue;
                 dados->board[dados->faixaNumero][i] = TEXT(' ');
                 if (i == 0)   dados->board[dados->faixaNumero][dados->cols - 1] = TEXT('<');
                 else   dados->board[dados->faixaNumero][i - 1] = TEXT('<');
-
-                
-
-
             }
-
             //ReleaseMutex(dados->hMutex);
         }       
 
@@ -186,29 +163,17 @@ DWORD WINAPI ThreadRow(LPVOID param) {
                 if (l == dados->cols - 1)   dados->board[dados->faixaNumero][0] = TEXT('>');
                 else   dados->board[dados->faixaNumero][l + 1] = TEXT('>');
 
-
-
             }
         }
         ReleaseMutex(dados->hMutex);
 
         Sleep(dados->faixaVelocidade);
 
-        
-
-
 
     } while (_tcscmp(dados->command, TEXT("sair")));
     
-
-    
     ExitThread(0);
-
-    
-
-    
     return 0;
-
 }
 DWORD WINAPI ThreadMapping(LPVOID param) {
     int fim;
@@ -229,8 +194,10 @@ DWORD WINAPI ThreadMapping(LPVOID param) {
                 dadosPassados.board[i][j] = dados->jogo->board[i][j];
             }
         }
-        if (!_tcscmp(dados->command, TEXT("sair"))) dadosPassados.terminar = 0;
-        
+        if (!_tcscmp(dados->command, TEXT("sair"))) {
+            dadosPassados.terminar = 0;
+            dados->TERMINAR = 0;
+        }
         
         CopyMemory(dados->board, &dadosPassados,sizeof(matriz));
         fim = dados->TERMINAR;
@@ -261,16 +228,12 @@ DWORD WINAPI ThreadBuffer(LPVOID param) {
     buffer_circular* bufferData;
     HANDLE hMutexBuffer;
 
-    //bufferData = (buffer_circular*)malloc(sizeof(buffer_circular));
-
-
     hMutexBuffer = CreateMutex(NULL, FALSE, TEXT("TP_MUTEX_CONSUMIDOR"));
     if (hMutexBuffer == NULL) {
         _tprintf(TEXT("Erro no CreateMutex\n"));
         return -1;
     }
 
-    //inicializaBuffer(bufferData);
     HANDLE hFileBuffer = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(buffer_circular), TEXT("TP_BufferCircular"));
 
     if (hFileBuffer == NULL) {
@@ -302,7 +265,7 @@ DWORD WINAPI ThreadBuffer(LPVOID param) {
         WaitForSingleObject(hSemLeitura, INFINITE);
         //WaitForSingleObject(hMutexBuffer, INFINITE);
 
-        CopyMemory(&pedidos, &bufferData->pedidos[bufferData->posL], sizeof(pedido));
+        leituraBufferCircular(bufferData, &pedidos);
 
         //_tprintf(TEXT("\n(%d)%d %d\n"),bufferData->posL, pedidos.paraMovimento, pedidos.segundosParar);
         if (pedidos.paraMovimento){
@@ -344,30 +307,17 @@ DWORD WINAPI ThreadBuffer(LPVOID param) {
             ReleaseMutex(dados->hMutex);
 
         }
-        
-
 
         if (bufferData->posL == BUFFER_SIZE)
             bufferData->posL = 0;
-        
-        
-            
         
         //ReleaseMutex(hMutexBuffer);
         ReleaseSemaphore(hSemEscrita, 1, NULL);
         
         Sleep(1000);
-
-      
-
-        //Testar aqui se recebe correto
-        //Atençao que se nao aparecer nada 
-        //no ecra pode ser pelo system(cls) que limpa
     } 
    
     ExitThread(0);
-
-
 }
 
 
@@ -407,7 +357,6 @@ int _tmain(int argc, TCHAR* argv[]) {
         return -1;
     }
 
-
     DWORD tamanho = sizeof(velocidade);
     if (argc < 3 ) {
         
@@ -421,9 +370,6 @@ int _tmain(int argc, TCHAR* argv[]) {
             _tprintf(TEXT("Num de faixas:%d\n"), numFaixas);
         else
             _tprintf(TEXT("Erro ao recuperar o valor da chave\n"));
-
-
-
 
     }else {
         numFaixas = _ttoi(argv[1]);// <faixas> <velocidade>
@@ -447,11 +393,6 @@ int _tmain(int argc, TCHAR* argv[]) {
     }
 
     rows = numFaixas + 2;
-
-    
-    
-
-
 
     //----- mapping -----
     pDados.hFileMap = CreateFileMapping(INVALID_HANDLE_VALUE,NULL,PAGE_READWRITE,0,sizeof(mapping),TEXT("TP_MEM_PART"));
@@ -498,8 +439,6 @@ int _tmain(int argc, TCHAR* argv[]) {
     }
     //-------
 
-
-
     hGlobalEvent= CreateEvent(NULL, TRUE, FALSE, NULL);
     if (hGlobalEvent == NULL) {
         _tprintf(TEXT("Erro a criar o evento\n"));
@@ -543,14 +482,11 @@ int _tmain(int argc, TCHAR* argv[]) {
 
     }
 
-    
-    
-    
     int fim;
     do {
         //WaitForSingleObject(hMutex, INFINITE);
         system("cls");
-        show(areaJogo, rows - 2, cols);
+        imprimeMapa(&pDados);
         if (!_tcscmp(dados->command, TEXT("para")))     _tprintf(TEXT("\nPressione uma tecla para retomar jogo:\n"));
         else    _tprintf(TEXT("\nEscreva comando:\n"));
         WaitForSingleObject(dados->hMutex, INFINITE);
@@ -560,8 +496,6 @@ int _tmain(int argc, TCHAR* argv[]) {
         }
         fim = TERMINAR;
         ReleaseMutex(dados->hMutex);
-
-        
         
         Sleep(100);
         
@@ -573,10 +507,6 @@ int _tmain(int argc, TCHAR* argv[]) {
     WaitForSingleObject(hUIThread, INFINITE);
     WaitForSingleObject(hMapThread, INFINITE);
     WaitForSingleObject(hBufferThread, INFINITE);
-
-
-
-
 
 
     //fechar handlers e memoria dinamica

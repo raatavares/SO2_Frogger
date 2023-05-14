@@ -1,14 +1,1 @@
-﻿  Servidor.c
-C:\Users\Danie\Desktop\TP_SO2_Fogger\Servidor\Servidor.c(236,30): warning C4047: '=': 'int' difere em níveis de indireção de 'int *'
-C:\Users\Danie\Desktop\TP_SO2_Fogger\Servidor\Servidor.c(217,11): warning C4101: 'limpeza': variável local não referenciada
-C:\Users\Danie\Desktop\TP_SO2_Fogger\Servidor\Servidor.c(278,9): warning C4033: 'ThreadBuffer' deve retornar um valor
-C:\Users\Danie\Desktop\TP_SO2_Fogger\Servidor\Servidor.c(283,9): warning C4033: 'ThreadBuffer' deve retornar um valor
-C:\Users\Danie\Desktop\TP_SO2_Fogger\Servidor\Servidor.c(288,9): warning C4033: 'ThreadBuffer' deve retornar um valor
-C:\Users\Danie\Desktop\TP_SO2_Fogger\Servidor\Servidor.c(293,9): warning C4033: 'ThreadBuffer' deve retornar um valor
-C:\Users\Danie\Desktop\TP_SO2_Fogger\Servidor\Servidor.c(508,44): warning C4020: 'CreateMutexW': muitos parâmetros reais
-C:\Users\Danie\Desktop\TP_SO2_Fogger\Servidor\Servidor.c(528,37): warning C4047: '=': 'int *' difere em níveis de indireção de 'int'
-C:\Users\Danie\Desktop\TP_SO2_Fogger\Servidor\Servidor.c(535,31): warning C4047: '=': 'int *' difere em níveis de indireção de 'int'
-C:\Users\Danie\Desktop\TP_SO2_Fogger\Servidor\Servidor.c(388,11): warning C4101: 'par_valor': variável local não referenciada
-C:\Users\Danie\Desktop\TP_SO2_Fogger\Servidor\Servidor.c(379,11): warning C4101: 'resultado': variável local não referenciada
-C:\Users\Danie\Desktop\TP_SO2_Fogger\Servidor\Servidor.c(371): warning C4715: 'ThreadBuffer': nem todos os caminhos de controle retornam um valor
-  Servidor.vcxproj -> C:\Users\Danie\Desktop\TP_SO2_Fogger\x64\Debug\Servidor.exe
+﻿  Servidor.vcxproj -> C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\x64\Debug\Servidor.exe

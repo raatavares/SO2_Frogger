@@ -1,7 +1,7 @@
 #include "Operador.h"
 #include "..\\DLL\Header.h"
 
-
+int TERMINAR = 0;
 
 void leMapa(mapping* pDados) {
 	pDados->hFileMap = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(mapping), TEXT("TP_MEM_PART"));
@@ -29,12 +29,7 @@ void leMapa(mapping* pDados) {
 		return 1;
 	}
 
-	for (int i = 0; i < pDados->board->rows; i++) {
-		for (int j = 0; j < pDados->board->cols; j++) {
-			_tprintf(TEXT("%c"), pDados->board->board[i][j]);
-		}
-		_tprintf(TEXT("\n"));
-	}
+	imprimeMapa(pDados);
 
 	_tprintf(TEXT("\n[MAPA] Mapa lido com sucesso!\n\n"));
 
@@ -43,25 +38,14 @@ void leMapa(mapping* pDados) {
 
 DWORD WINAPI ThreadAtualizaMapa(LPVOID param) {
 	mapping* pDados = ((mapping*)param);
-	pDados->board->terminar = 1;
-	while (pDados->board->terminar) {
-		//_tprintf(TEXT("[%d]"), pDados->board->terminar);
-
+	while (pDados->board->terminar && !TERMINAR) {
 		WaitForSingleObject(hSemAtualizaMapa, INFINITE);
 		WaitForSingleObject(hMutex, INFINITE);
 		
-
-		_tprintf(TEXT("\n"));
-		for (int i = 0; i < pDados->board->rows; i++) {
-			for (int j = 0; j < pDados->board->cols; j++) {
-				_tprintf(TEXT("%c"), pDados->board->board[i][j]);
-			}
-			_tprintf(TEXT("\n"));
-		}
+		imprimeMapa(pDados);
 		ReleaseMutex(hMutex);
 		Sleep(1000);
 	};
-	//_tprintf(TEXT("[%d]"), pDados->board->terminar);
 
 	ExitThread(0);
 }
@@ -80,8 +64,6 @@ DWORD WINAPI ThreadComandos(LPVOID param) {
 	int seg, pista;
 	pedido pedidoN;
 
-	//buffer = (buffer_circular*)malloc(sizeof(buffer_circular));
-	//inicializaBuffer(buffer);
 	HANDLE hFileBuffer = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, TEXT("TP_BufferCircular"));
 
 	if (hFileBuffer == NULL) {
@@ -106,12 +88,6 @@ DWORD WINAPI ThreadComandos(LPVOID param) {
 	
 
 	do {
-		
-
-		
-			
-		
-
 		WaitForSingleObject(hSemEscrita, INFINITE);
 		WaitForSingleObject(hMutex, INFINITE);
 
@@ -129,7 +105,7 @@ DWORD WINAPI ThreadComandos(LPVOID param) {
 			pedidoN.paraMovimento = 1;
 			pedidoN.inverteSentido = 0;
 			pedidoN.insereObstaculo = 0;
-			CopyMemory(&buffer->pedidos[buffer->posE], &pedidoN, sizeof(pedido));
+			escritaBufferCircular(buffer, &pedidoN);
 
 			buffer->posE = (buffer->posE + 1) % BUFFER_SIZE;  // Avança a posição de escrita no buffer circular
 		}
@@ -137,7 +113,7 @@ DWORD WINAPI ThreadComandos(LPVOID param) {
 			pedidoN.insereObstaculo = 1;
 			pedidoN.paraMovimento = 0;
 			pedidoN.inverteSentido = 0;
-			CopyMemory(&buffer->pedidos[buffer->posE], &pedidoN, sizeof(pedido));
+			escritaBufferCircular(buffer, &pedidoN);
 			buffer->posE = (buffer->posE + 1) % BUFFER_SIZE;  // Avança a posição de escrita no buffer circular
 		}
 		else if (!_tcscmp(op, TEXT("inverte"))) {
@@ -152,7 +128,7 @@ DWORD WINAPI ThreadComandos(LPVOID param) {
 			_tprintf(_T("\n2"));
 			pedidoN.pistaInverter = pista;
 			_tprintf(_T("\n3"));
-			CopyMemory(&buffer->pedidos[buffer->posE], &pedidoN, sizeof(pedido));
+			escritaBufferCircular(buffer, &pedidoN);
 			buffer->posE = (buffer->posE + 1) % BUFFER_SIZE;  // Avança a posição de escrita no buffer circular
 		}
 		else if (!_tcscmp(op, TEXT("ajuda"))) {
@@ -167,6 +143,7 @@ DWORD WINAPI ThreadComandos(LPVOID param) {
 	} while (_tcscmp(op, TEXT("fim")));
 
 	_tprintf(_T("\nA sair...\n"));
+	TERMINAR = 1;
 
 	Sleep(1000);
 
@@ -180,14 +157,13 @@ int _tmain(int argc, TCHAR* argv[]) {
 	mapping pDados;
 	pDados.TERMINAR = 0;
 
-
 #ifdef UNICODE 
 	_setmode(_fileno(stdin), _O_WTEXT);
 	_setmode(_fileno(stdout), _O_WTEXT);
 	_setmode(_fileno(stderr), _O_WTEXT);
 #endif
 
-	_tprintf(TEXT("\nA aguardar...\n"));
+	_tprintf(TEXT("\nA aguardarççççççápº...\n"));
 	HANDLE hSemInstancias = CreateSemaphore(NULL, 2, 2, TEXT("SEM_INSTANCIAS"));
 	WaitForSingleObject(hSemInstancias, INFINITE);
 
@@ -210,14 +186,10 @@ int _tmain(int argc, TCHAR* argv[]) {
 			return 0;
 		}
 
-		/*HANDLE ghEvents[2];
+		HANDLE ghEvents[2];
 		ghEvents[0] = hThreadComandos;
 		ghEvents[1] = hThreadAtualizaMapa;
-		WaitForMultipleObjects(2, ghEvents, FALSE, INFINITE);*/
-		WaitForSingleObject(hThreadAtualizaMapa, INFINITE);
-		TerminateThread(hThreadComandos, 0);
-		WaitForSingleObject(hThreadComandos, INFINITE);
-
+		WaitForMultipleObjects(2, ghEvents, FALSE, INFINITE);
 	}
 
 	ReleaseSemaphore(hSemInstancias, 1, NULL);
