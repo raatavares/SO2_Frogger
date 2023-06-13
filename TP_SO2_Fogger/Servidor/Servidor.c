@@ -25,6 +25,10 @@ BOOL putSapo(TCHAR** board, int numFaixas, int cols) {
     }
     return TRUE;
 }
+DWORD WINAPI ThreadAceitaUsers(LPVOID param) {
+    
+
+}
 
 TCHAR** createBoard(int numFaixas,int cols) {
     TCHAR** areaJogo = (TCHAR**)malloc((numFaixas + 2) * sizeof(TCHAR*));
@@ -323,12 +327,13 @@ DWORD WINAPI ThreadBuffer(LPVOID param) {
 
 int _tmain(int argc, TCHAR* argv[]) {
     int TERMINAR=0;
+    int Mode;//0-singleplayer   1-multiplayer
     mapping pDados;
     data dados[MAXFAIXAS];
     HKEY chave;
     DWORD resultado;
     int varAdd = 0, numFaixas;
-    HANDLE hOneServer,hMutex;
+    HANDLE hOneServer,hMutex;//MUTEXES
     HANDLE hGlobalEvent;
     int cols = 20, velocidade,rows;
     TCHAR** areaJogo;
@@ -336,7 +341,11 @@ int _tmain(int argc, TCHAR* argv[]) {
     TCHAR par_nome[TAM] = TEXT("SOFTWARE\\Frogger\\velocidade");
     TCHAR command[TAM];
     DWORD par_valor;
-    HANDLE hRowThread[MAXFAIXAS],hUIThread,hMapThread, hBufferThread;
+    HANDLE hRowThread[MAXFAIXAS],hUIThread,hMapThread, hBufferThread,hCriaSaposThread;//THREADS
+    HANDLE hPipe;//PIPES
+
+
+    pipe_user_server userServerData;
     
 
 #ifdef UNICODE 
@@ -437,7 +446,82 @@ int _tmain(int argc, TCHAR* argv[]) {
         _tprintf(TEXT("Erro no CreateSemaphore\n"));
         return 1;
     }
-    //-------
+    //------- sapos --------
+    userServerData.jogo = pDados.jogo;
+
+
+    hPipe = CreateNamedPipe(starterPipe, PIPE_ACCESS_DUPLEX, PIPE_WAIT |
+        PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE, 1,
+        sizeof(pipe_user_server), sizeof(pipe_user_server), 1000, NULL);
+    if (hPipe == INVALID_HANDLE_VALUE) {
+        _tprintf(TEXT("[ERRO] Criar Named Pipe! (CreateNamedPipe)"));
+        exit(-1);
+    }
+
+    _tprintf(TEXT("Aguardando conexão do cliente...\n"));
+
+    if (!ConnectNamedPipe(hPipe, NULL)) {
+        _tprintf(TEXT("[ERRO] Ligação ao leitor! (ConnectNamedPipe)\n"));
+        exit(-1);
+    }
+    
+
+    _tprintf(TEXT("Cliente 1 conectado!\n"));
+
+    DWORD bytesRead;
+    if (ReadFile(hPipe, &userServerData.players[0], sizeof(player), &bytesRead, NULL)) {
+        _tprintf(TEXT("Modo escolhido pelo cliente: %d\n", userServerData.players[0].mode));
+    }
+    else {
+        _tprintf(TEXT("Falha ao receber o inteiro. Código de erro: %lu\n", GetLastError()));
+        exit(1);
+    }
+    
+    userServerData.players[0].player_char = _T("S");
+    //userServerData.players[1].mode = userServerData.players[0].mode;
+
+    DWORD bytesWrite;
+    if (WriteFile(hPipe, &userServerData.players[0], sizeof(player), &bytesWrite, NULL)) {
+        _tprintf(TEXT("Cliente atribuido com: 'S'\n"));
+    }
+    else {
+        _tprintf(TEXT("[ERRO]Código de erro: %lu\n", GetLastError()));
+        exit(1);
+    }
+    if (userServerData.players[0].mode!=0)
+    {
+        if (!ConnectNamedPipe(hPipe, NULL)) {
+            _tprintf(TEXT("[ERRO] Ligação ao leitor! (ConnectNamedPipe)\n"));
+            exit(-1);
+        }
+
+        _tprintf(TEXT("Cliente 2 conectado!\n"));
+
+        DWORD bytesRead;
+        if (ReadFile(hPipe, &userServerData.players[1], sizeof(player), &bytesRead, NULL)) {
+            _tprintf(TEXT("Modo escolhido pelo cliente2: %d\n", userServerData.players[1].mode));
+        }
+        else {
+            _tprintf(TEXT("Falha ao receber o inteiro. Código de erro: %lu\n", GetLastError()));
+            exit(1);
+        }
+
+        userServerData.players[1].player_char = _T("s");
+        userServerData.players[1].mode = userServerData.players[0].mode;
+
+        if (WriteFile(hPipe, &userServerData.players[0], sizeof(player), &bytesWrite, NULL)) {
+            _tprintf(TEXT("Cliente atribuido com: 'S'\n"));
+        }
+        else {
+            _tprintf(TEXT("[ERRO]Código de erro: %lu\n", GetLastError()));
+            exit(1);
+        }
+
+    }//ja estao os dois/um com as informaçoes criadas basta agora criar os pipes individuais
+    
+
+    
+    //---------------------------
 
     hGlobalEvent= CreateEvent(NULL, TRUE, FALSE, NULL);
     if (hGlobalEvent == NULL) {
@@ -483,7 +567,9 @@ int _tmain(int argc, TCHAR* argv[]) {
     }
 
     int fim;
+
     do {
+
         //WaitForSingleObject(hMutex, INFINITE);
         system("cls");
         imprimeMapa(&pDados);
