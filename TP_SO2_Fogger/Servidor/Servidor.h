@@ -5,6 +5,7 @@
 #include <io.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <string.h>
 
 
 BOOL putSapo(TCHAR** board, int numFaixas, int cols);

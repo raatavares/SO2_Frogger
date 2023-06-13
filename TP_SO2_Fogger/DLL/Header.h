@@ -41,10 +41,8 @@ typedef struct {
 	HANDLE hEvent;
 	HANDLE hMutex;
 	TCHAR* command;
+	HANDLE sharedMapEvent; //evento alerta atualização de mapa
 } mapping; //struct para mapping
-
-//Semaforo AtualizaMapa
-HANDLE hSemAtualizaMapa;
 
 typedef struct {
 	int segundosParar, pistaInverter;
@@ -85,3 +83,4 @@ HANDLE hSemEscrita, hSemLeitura;
 extern DLL_API void escritaBufferCircular(buffer_circular* buffer, pedido* pedidoN);
 extern DLL_API void leituraBufferCircular(buffer_circular* buffer, pedido* pedidoN);
 extern DLL_API void imprimeMapa(mapping* pDados);
+

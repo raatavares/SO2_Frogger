@@ -1,6 +1,8 @@
 #include "Servidor.h"
 #include "..\\DLL\Header.h"
 
+int PAUSE = 0;
+
 int gerarAleatorio(int minimo, int maximo) {
     int intervalo = maximo - minimo + 1;
     return rand() % intervalo + minimo;
@@ -25,10 +27,11 @@ BOOL putSapo(TCHAR** board, int numFaixas, int cols) {
     }
     return TRUE;
 }
+
 DWORD WINAPI ThreadAceitaUsers(LPVOID param) {
-    
 
 }
+
 
 TCHAR** createBoard(int numFaixas,int cols) {
     TCHAR** areaJogo = (TCHAR**)malloc((numFaixas + 2) * sizeof(TCHAR*));
@@ -142,8 +145,11 @@ DWORD WINAPI ThreadRow(LPVOID param) {
         break;
     }
     do {
-        if (_tcscmp(dados->command, TEXT("para")));
-        else continue;
+        if (_tcscmp(dados->command, TEXT("para"))) {
+            PAUSE = 0;
+        }else {
+            continue;
+        }
 
         WaitForSingleObject(dados->hMutex, INFINITE);
         for (int i = 0; i < dados->cols; i++){
@@ -185,7 +191,7 @@ DWORD WINAPI ThreadMapping(LPVOID param) {
     matriz dadosPassados;
     TCHAR limpeza[20];
 
-    
+        
     do {
         WaitForSingleObject(dados->hMutex, INFINITE);
         
@@ -207,7 +213,12 @@ DWORD WINAPI ThreadMapping(LPVOID param) {
         fim = dados->TERMINAR;
         ReleaseMutex(dados->hMutex);
 
-        ReleaseSemaphore(hSemAtualizaMapa, 1, NULL);
+        if (PAUSE == 0) {
+            SetEvent(dados->sharedMapEvent);
+            Sleep(500);
+            ResetEvent(dados->sharedMapEvent);
+        }
+
 
         SetEvent(dados->hEvent);
         Sleep(500);
@@ -225,12 +236,16 @@ DWORD WINAPI ThreadMapping(LPVOID param) {
     ExitThread(0);
 
 }
-DWORD WINAPI ThreadBuffer(LPVOID param) {
+
+DWORD WINAPI ThreadBuffer(LPVOID param, LPVOID mem) {
     data* dados = (data*)param;
+    mapping* pDados = (mapping*)mem;
+
 
     pedido pedidos;
     buffer_circular* bufferData;
     HANDLE hMutexBuffer;
+    HANDLE hThreadCountdown;
 
     hMutexBuffer = CreateMutex(NULL, FALSE, TEXT("TP_MUTEX_CONSUMIDOR"));
     if (hMutexBuffer == NULL) {
@@ -274,8 +289,10 @@ DWORD WINAPI ThreadBuffer(LPVOID param) {
         //_tprintf(TEXT("\n(%d)%d %d\n"),bufferData->posL, pedidos.paraMovimento, pedidos.segundosParar);
         if (pedidos.paraMovimento){
             WaitForSingleObject(dados->hMutex,pedidos.segundosParar);
+            PAUSE = 1;
             _tprintf(TEXT("\n(%d)Movimento parado por %ds\n"), bufferData->posL, pedidos.segundosParar);
             Sleep(pedidos.segundosParar * 1000);
+            PAUSE = 0;
             bufferData->posL++;
             ReleaseMutex(dados->hMutex);
         }
@@ -333,7 +350,7 @@ int _tmain(int argc, TCHAR* argv[]) {
     HKEY chave;
     DWORD resultado;
     int varAdd = 0, numFaixas;
-    HANDLE hOneServer,hMutex;//MUTEXES
+    HANDLE hOneServer, hMutex;//MUTEXES
     HANDLE hGlobalEvent;
     int cols = 20, velocidade,rows;
     TCHAR** areaJogo;
@@ -341,7 +358,7 @@ int _tmain(int argc, TCHAR* argv[]) {
     TCHAR par_nome[TAM] = TEXT("SOFTWARE\\Frogger\\velocidade");
     TCHAR command[TAM];
     DWORD par_valor;
-    HANDLE hRowThread[MAXFAIXAS],hUIThread,hMapThread, hBufferThread,hCriaSaposThread;//THREADS
+    HANDLE hRowThread[MAXFAIXAS], hUIThread, hMapThread, hBufferThread, hCriaSaposThread;//THREADS
     HANDLE hPipe;//PIPES
 
 
@@ -430,6 +447,20 @@ int _tmain(int argc, TCHAR* argv[]) {
         return 1;
     }
 
+    pDados.sharedMapEvent = CreateEvent(
+        NULL,
+        TRUE,
+        FALSE,
+        TEXT("ATUALIZAMAP_EVENTO"));
+
+    if (pDados.sharedMapEvent == NULL) {
+        _tprintf(TEXT("Erro no CreateEvent\n"));
+        return 1;
+    }
+    SetEvent(pDados.sharedMapEvent);
+
+
+
     pDados.hMutex = CreateMutex(
         NULL,
         FALSE,
@@ -441,11 +472,6 @@ int _tmain(int argc, TCHAR* argv[]) {
         return 1;
     }
 
-    hSemAtualizaMapa = CreateSemaphore(NULL, 0, BUFFER_SIZE, TEXT("TP_SEMAFORO_MAPA"));
-    if (hSemAtualizaMapa == NULL) {
-        _tprintf(TEXT("Erro no CreateSemaphore\n"));
-        return 1;
-    }
     //------- sapos --------
     userServerData.jogo = pDados.jogo;
 
@@ -464,7 +490,7 @@ int _tmain(int argc, TCHAR* argv[]) {
         _tprintf(TEXT("[ERRO] Ligação ao leitor! (ConnectNamedPipe)\n"));
         exit(-1);
     }
-    
+
 
     _tprintf(TEXT("Cliente 1 conectado!\n"));
 
@@ -476,7 +502,7 @@ int _tmain(int argc, TCHAR* argv[]) {
         _tprintf(TEXT("Falha ao receber o inteiro. Código de erro: %lu\n", GetLastError()));
         exit(1);
     }
-    
+
     userServerData.players[0].player_char = _T("S");
     //userServerData.players[1].mode = userServerData.players[0].mode;
 
@@ -488,7 +514,7 @@ int _tmain(int argc, TCHAR* argv[]) {
         _tprintf(TEXT("[ERRO]Código de erro: %lu\n", GetLastError()));
         exit(1);
     }
-    if (userServerData.players[0].mode!=0)
+    if (userServerData.players[0].mode != 0)
     {
         if (!ConnectNamedPipe(hPipe, NULL)) {
             _tprintf(TEXT("[ERRO] Ligação ao leitor! (ConnectNamedPipe)\n"));
@@ -518,9 +544,9 @@ int _tmain(int argc, TCHAR* argv[]) {
         }
 
     }//ja estao os dois/um com as informaçoes criadas basta agora criar os pipes individuais
-    
 
-    
+
+
     //---------------------------
 
     hGlobalEvent= CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -560,7 +586,7 @@ int _tmain(int argc, TCHAR* argv[]) {
     //----- BUFFER ------
 
 
-    hBufferThread = CreateThread(NULL, 0, ThreadBuffer, &dados, 0, NULL);
+    hBufferThread = CreateThread(NULL, 0, ThreadBuffer, &dados, &pDados, 0, NULL);
     if (hBufferThread == NULL) {
         _tprintf(TEXT("Problema com threadBuffer ...\n"));
 
@@ -573,7 +599,10 @@ int _tmain(int argc, TCHAR* argv[]) {
         //WaitForSingleObject(hMutex, INFINITE);
         system("cls");
         imprimeMapa(&pDados);
-        if (!_tcscmp(dados->command, TEXT("para")))     _tprintf(TEXT("\nPressione uma tecla para retomar jogo:\n"));
+        if (!_tcscmp(dados->command, TEXT("para"))) {
+            PAUSE = 1;
+            _tprintf(TEXT("\nPressione uma tecla para retomar jogo:\n"));
+        }
         else    _tprintf(TEXT("\nEscreva comando:\n"));
         WaitForSingleObject(dados->hMutex, INFINITE);
         if (!_tcscmp(dados->command, TEXT("sair"))) {

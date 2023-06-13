@@ -12,6 +12,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Servidor", "Servidor\Servid
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DLL", "DLL\DLL.vcxproj", "{800D916F-EF49-4593-B33F-38486DDBC611}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SapoF", "SapoF\SapoF.vcxproj", "{EEE3F069-F892-483D-8B58-EBEF0A98CF5D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -44,6 +46,14 @@ Global
 		{800D916F-EF49-4593-B33F-38486DDBC611}.Release|x64.Build.0 = Release|x64
 		{800D916F-EF49-4593-B33F-38486DDBC611}.Release|x86.ActiveCfg = Release|Win32
 		{800D916F-EF49-4593-B33F-38486DDBC611}.Release|x86.Build.0 = Release|Win32
+		{EEE3F069-F892-483D-8B58-EBEF0A98CF5D}.Debug|x64.ActiveCfg = Debug|x64
+		{EEE3F069-F892-483D-8B58-EBEF0A98CF5D}.Debug|x64.Build.0 = Debug|x64
+		{EEE3F069-F892-483D-8B58-EBEF0A98CF5D}.Debug|x86.ActiveCfg = Debug|Win32
+		{EEE3F069-F892-483D-8B58-EBEF0A98CF5D}.Debug|x86.Build.0 = Debug|Win32
+		{EEE3F069-F892-483D-8B58-EBEF0A98CF5D}.Release|x64.ActiveCfg = Release|x64
+		{EEE3F069-F892-483D-8B58-EBEF0A98CF5D}.Release|x64.Build.0 = Release|x64
+		{EEE3F069-F892-483D-8B58-EBEF0A98CF5D}.Release|x86.ActiveCfg = Release|Win32
+		{EEE3F069-F892-483D-8B58-EBEF0A98CF5D}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

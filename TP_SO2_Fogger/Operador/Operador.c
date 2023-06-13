@@ -23,12 +23,6 @@ void leMapa(mapping* pDados) {
 		pDados->board = NULL;
 		return;
 	}
-	hSemAtualizaMapa = CreateSemaphore(NULL, 0, BUFFER_SIZE, TEXT("TP_SEMAFORO_MAPA"));
-	if (hSemAtualizaMapa == NULL) {
-		_tprintf(TEXT("Erro no CreateSemaphore\n"));
-		return 1;
-	}
-
 	imprimeMapa(pDados);
 
 	_tprintf(TEXT("\n[MAPA] Mapa lido com sucesso!\n\n"));
@@ -38,11 +32,27 @@ void leMapa(mapping* pDados) {
 
 DWORD WINAPI ThreadAtualizaMapa(LPVOID param) {
 	mapping* pDados = ((mapping*)param);
+
+
+	pDados->sharedMapEvent = CreateEvent(
+		NULL,
+		TRUE,
+		FALSE,
+		TEXT("ATUALIZAMAP_EVENTO"));
+
+	if (pDados->sharedMapEvent == NULL) {
+		_tprintf(TEXT("Erro no CreateEvent\n"));
+		return 1;
+	}
+	SetEvent(pDados->sharedMapEvent);
+	ResetEvent(pDados->sharedMapEvent);
+
 	while (pDados->board->terminar && !TERMINAR) {
-		WaitForSingleObject(hSemAtualizaMapa, INFINITE);
 		WaitForSingleObject(hMutex, INFINITE);
-		
+
+		WaitForSingleObject(pDados->sharedMapEvent, INFINITE);
 		imprimeMapa(pDados);
+		
 		ReleaseMutex(hMutex);
 		Sleep(1000);
 	};
@@ -61,7 +71,7 @@ void ajuda() {
 DWORD WINAPI ThreadComandos(LPVOID param) {
 	TCHAR op[TAM];
 	buffer_circular* buffer = ((buffer_circular*)param);
-	int seg, pista;
+	int pista;
 	pedido pedidoN;
 
 	HANDLE hFileBuffer = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, TEXT("TP_BufferCircular"));
@@ -163,7 +173,6 @@ int _tmain(int argc, TCHAR* argv[]) {
 	_setmode(_fileno(stderr), _O_WTEXT);
 #endif
 
-	_tprintf(TEXT("\nA aguardarççççççápº...\n"));
 	HANDLE hSemInstancias = CreateSemaphore(NULL, 2, 2, TEXT("SEM_INSTANCIAS"));
 	WaitForSingleObject(hSemInstancias, INFINITE);
 
@@ -193,6 +202,7 @@ int _tmain(int argc, TCHAR* argv[]) {
 	}
 
 	ReleaseSemaphore(hSemInstancias, 1, NULL);
+	CloseHandle(pDados.sharedMapEvent);
 
 	return 0;
 }

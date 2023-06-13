@@ -1,7 +1,5 @@
 ﻿  Operador.c
-C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Operador\Operador.c(29,11): warning C4098: 'leMapa': função 'void' retornando um valor
-C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Operador\Operador.c(71,3): warning C4033: 'ThreadComandos' deve retornar um valor
-C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Operador\Operador.c(76,3): warning C4033: 'ThreadComandos' deve retornar um valor
-C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Operador\Operador.c(64,6): warning C4101: 'seg': variável local não referenciada
-C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Operador\Operador.c(151): warning C4715: 'ThreadComandos': nem todos os caminhos de controle retornam um valor
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Operador\Operador.c(81,3): warning C4033: 'ThreadComandos' deve retornar um valor
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Operador\Operador.c(86,3): warning C4033: 'ThreadComandos' deve retornar um valor
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\Operador\Operador.c(161): warning C4715: 'ThreadComandos': nem todos os caminhos de controle retornam um valor
   Operador.vcxproj -> C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\x64\Debug\Operador.exe
