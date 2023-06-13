@@ -15,6 +15,8 @@
 #define BUFFER_SIZE 10
 
 #define PATH_DLL TEXT("..\\x64\\Debug\\DLL.dll")
+#define starterPipe TEXT("\\\\.\\pipe\\teste")
+
 
 
 typedef struct {
@@ -55,6 +57,19 @@ typedef struct {
 	int posL; //proxima posicao de leitura
 	int* TERMINAR;
 } buffer_circular;
+
+
+typedef struct {
+	//TCHAR board[10][20];
+	//int rows, cols, terminar;
+	int mode;//0-singleplayer
+	TCHAR move;
+	TCHAR player_char;
+}player;
+typedef struct {
+	player players[2];
+	data* jogo;
+}pipe_user_server;
 
 //Mapping BufferCircular
 HANDLE hFileBuffer;
