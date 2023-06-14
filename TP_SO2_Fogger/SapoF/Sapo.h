@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <commctrl.h>
 
-
+/*
 typedef struct {
 	TCHAR board[10][20];
 } MAPA;
@@ -16,5 +16,7 @@ typedef struct {
 typedef struct {
 	MAPA* mapa;
 } DADOS;
+*/
 
+#define namepipe TEXT("\\\\.\\pipe\\sapo")
 HANDLE hPipe;

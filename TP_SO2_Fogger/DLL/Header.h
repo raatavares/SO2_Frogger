@@ -31,7 +31,7 @@ typedef struct {
 typedef struct {
 	TCHAR board[10][20];
 	int rows, cols, terminar;
-}matriz;
+} matriz;
 
 typedef struct {
 	int* TERMINAR;
@@ -63,11 +63,11 @@ typedef struct {
 	int mode;//0-singleplayer
 	TCHAR move;
 	TCHAR player_char;
-}player;
+} player;
 typedef struct {
 	player players[2];
 	data* jogo;
-}pipe_user_server;
+} pipe_user_server;
 
 //Mapping BufferCircular
 HANDLE hFileBuffer;

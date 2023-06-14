@@ -1,6 +1,6 @@
 #include "framework.h"
 #include "Sapo.h"
-//#include "..\\DLL\Header.h"
+#include "..\\DLL\Header.h"
 
 #define MAX_LOADSTRING 100
 #define SAIR_BUTTON 0
@@ -9,7 +9,8 @@
 #define COMPETICAO_BUTTOM 2
 #define ABOUT_BUTTON 3
 
-DADOS dados;
+//DADOS dados;
+player jogador;
 
 // Variáveis Globais:
 HINSTANCE hInst;                                // instância atual
@@ -23,7 +24,7 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 void AddMenu(HWND);
 void registerDialogClass(HINSTANCE);
 void displayDialog(HWND);
-HWND hName;
+HWND hName, hMainWindow;
 HMENU hMenu;
 
 
@@ -47,6 +48,31 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         return FALSE;
     }
 
+    hPipe = CreateNamedPipe(namepipe, PIPE_ACCESS_DUPLEX, PIPE_WAIT |
+        PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE, 1,
+        sizeof(pipe_user_server), sizeof(pipe_user_server), 1000, NULL);
+    if (hPipe == INVALID_HANDLE_VALUE) {
+        // Lidar com o erro ao criar o Named Pipe
+        MessageBox(NULL, _T("Falha ao criar o Named Pipe."), _T("Erro"), MB_ICONERROR | MB_OK);
+        return 1;
+    }
+    else
+    {
+        // O Named Pipe foi criado com sucesso
+        MessageBox(NULL, _T("Named Pipe criado com sucesso."), _T("Sucesso"), MB_ICONINFORMATION | MB_OK);
+    }
+
+    // Aguardar a conexão de um cliente
+    BOOL connected = ConnectNamedPipe(hPipe, NULL);
+    if (!connected)
+    {
+        // Lidar com o erro de conexão
+        MessageBox(NULL, _T("Falha ao aguardar a conexão do cliente."), _T("Erro"), MB_ICONERROR | MB_OK);
+        CloseHandle(hPipe);
+        return 1;
+    }
+
+
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_SAPOF));
 
@@ -62,6 +88,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
     }
 
+    // Fechar o Named Pipe antes de sair
+    CloseHandle(hPipe);
     return (int) msg.wParam;
 }
 
@@ -107,16 +135,16 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Armazenar o identificador de instância em nossa variável global
 
-   HWND hWnd = CreateWindowW(szWindowClass, TEXT("Sapo"), WS_OVERLAPPEDWINDOW,
+   hMainWindow = CreateWindowW(szWindowClass, TEXT("Sapo"), WS_OVERLAPPEDWINDOW,
       500, 0, 600, 600, NULL, NULL, hInstance, NULL);
 
-   if (!hWnd)
+   if (!hMainWindow)
    {
       return FALSE;
    }
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+   ShowWindow(hMainWindow, nCmdShow);
+   UpdateWindow(hMainWindow);
 
    return TRUE;
 }
@@ -142,8 +170,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             switch (LOWORD(wParam)) /* child ID */
             {
             case TESTE_BUTTON:
-                //MessageBeep(MB_OK);
-                displayDialog(hWnd);
+                MessageBeep(MB_OK);
                 break;
             case SAIR_BUTTON:
                 int value = MessageBox(hWnd, TEXT("Tem a certeza que deseja sair?"), TEXT("Confirmação"), MB_ICONQUESTION | MB_YESNO);
@@ -156,14 +183,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 MessageBox(hWnd, TEXT("Este trabalho é realizado por:\n   Daniel Bravo - 2021137795;\n   Ricardo Tavares - 2021144652;\nNo âmbito de Sistemas Operativos II - 2022/2023"), TEXT("Sobre"), MB_ICONINFORMATION | MB_OK);
                 break;
             }
-            case INDIVIDUAL_BUTTOM:
-                //recebeMapa(&dados);
-                InvalidateRect(hWnd, NULL, TRUE);
-                //TCHAR name[30];
-                //GetWindowText(hName, name, 30);
-                break;
-            case COMPETICAO_BUTTOM:
-                break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
@@ -216,9 +235,29 @@ void AddMenu(HWND hWnd) {
 }
 
 LRESULT CALLBACK DialogProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    DWORD n;
     switch (message)
     {
+    case WM_COMMAND:
+        switch (wParam)
+        {
+        case INDIVIDUAL_BUTTOM:
+            //jogador.mode = 0;
+            //WriteFile(hPipe, (LPVOID)&jogador.mode, sizeof(jogador.mode), &n, NULL);
+            EnableWindow(hMainWindow, TRUE);
+            DestroyWindow(hWnd);
+            MessageBeep(MB_OK);
+            break;
+        case COMPETICAO_BUTTOM:
+            EnableWindow(hMainWindow, TRUE);
+            DestroyWindow(hWnd);
+            break;
+        default:
+            break;
+        }
+        break;
     case WM_CLOSE:
+        EnableWindow(hMainWindow, TRUE);
         DestroyWindow(hWnd);
         break;
     default:
@@ -248,6 +287,8 @@ void displayDialog(HWND hWnd) {
     CreateWindow(TEXT("Static"), TEXT("Modalidade de jogo:"), WS_VISIBLE | WS_CHILD | SS_CENTER, 15, 160, 150, 20, hDld, NULL, NULL, NULL);
     CreateWindow(TEXT("Button"), TEXT("Individual"), WS_VISIBLE | WS_CHILD, 165, 160, 100, 20, hDld, (HMENU)INDIVIDUAL_BUTTOM, NULL, NULL);
     CreateWindow(TEXT("Button"), TEXT("Competição"), WS_VISIBLE | WS_CHILD, 265, 160, 100, 20, hDld, (HMENU)COMPETICAO_BUTTOM, NULL, NULL);
+
+    EnableWindow(hWnd, FALSE);
 }
 
 /*
