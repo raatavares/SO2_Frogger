@@ -47,32 +47,45 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     {
         return FALSE;
     }
+    //jogador.mode = 3;
 
-    hPipe = CreateNamedPipe(namepipe, PIPE_ACCESS_DUPLEX, PIPE_WAIT |
-        PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE, 1,
-        sizeof(pipe_user_server), sizeof(pipe_user_server), 1000, NULL);
-    if (hPipe == INVALID_HANDLE_VALUE) {
-        // Lidar com o erro ao criar o Named Pipe
-        MessageBox(NULL, _T("Falha ao criar o Named Pipe."), _T("Erro"), MB_ICONERROR | MB_OK);
-        return 1;
-    }
-    else
-    {
-        // O Named Pipe foi criado com sucesso
-        MessageBox(NULL, _T("Named Pipe criado com sucesso."), _T("Sucesso"), MB_ICONINFORMATION | MB_OK);
+
+    //================================================================================================
+
+    if (!WaitNamedPipe(starterPipe, NMPWAIT_WAIT_FOREVER)) {
+        _tprintf(TEXT("[ERRO] Ligar ao pipe '%s'! (WaitNamedPipe)\n"), starterPipe);
+        exit(-1);
     }
 
+    _tprintf(TEXT("[LEITOR] Ligação ao pipe do escritor... (CreateFile)\n"));
+    hPipe = CreateFile(starterPipe, GENERIC_ALL, 0, NULL, OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hPipe == NULL) {
+        _tprintf(TEXT("[ERRO] Ligar ao pipe '%s'! (CreateFile)\n"), starterPipe);
+        exit(-1);
+    }
+    _tprintf(TEXT("[LEITOR] Liguei-me...\n"));
     // Aguardar a conexão de um cliente
-    BOOL connected = ConnectNamedPipe(hPipe, NULL);
-    if (!connected)
-    {
-        // Lidar com o erro de conexão
-        MessageBox(NULL, _T("Falha ao aguardar a conexão do cliente."), _T("Erro"), MB_ICONERROR | MB_OK);
-        CloseHandle(hPipe);
-        return 1;
+    DWORD n;
+    //coloca o modo escolhido no jogador
+    jogador.mode = 1;
+
+    if (!WriteFile(hPipe, &jogador, sizeof(jogador), &n, NULL)) {
+        _tprintf(TEXT("[LEITOR] %d... (ReadFile)\n"), n);
     }
+    _tprintf(TEXT("[CLIENTE] Modo escolhido: %d\n"), jogador.mode);
 
+    //recebe o modo escolhido pelo primeiro quer este seja o primeiro ou o segundo
+    //tbm recebe o seu caracter unico
+    _tprintf(TEXT("[LEITOR] Recebi %d bytes: ''... (ReadFile)\n"), n);
+    if (!ReadFile(hPipe, &jogador, sizeof(jogador), &n, NULL)) {
+        _tprintf(TEXT("[LEITOR] %d... (ReadFile)\n"), n);
+    }
+    _tprintf(TEXT("[LEITOR] Recebi %d bytes: ''... (ReadFile)\n"), n);
+    DisconnectNamedPipe(hPipe);
+    
 
+    //==================================================================================================================
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_SAPOF));
 

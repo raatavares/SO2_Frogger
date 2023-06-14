@@ -493,10 +493,12 @@ int _tmain(int argc, TCHAR* argv[]) {
 
 
     _tprintf(TEXT("Cliente 1 conectado!\n"));
-
+    userServerData.players[0].mode = 3;
+    player pay;
+    _tprintf(TEXT("Modo inicial: %d\n", userServerData.players[0].mode));
     DWORD bytesRead;
-    if (ReadFile(hPipe, &userServerData.players[0], sizeof(player), &bytesRead, NULL)) {
-        _tprintf(TEXT("Modo escolhido pelo cliente: %d\n", userServerData.players[0].mode));
+    if (ReadFile(hPipe, &pay, sizeof(player), &bytesRead, NULL)) {
+        _tprintf(TEXT("Modo escolhido pelo cliente: %d\n", pay.mode));
     }
     else {
         _tprintf(TEXT("Falha ao receber o inteiro. Código de erro: %lu\n", GetLastError()));
@@ -514,6 +516,7 @@ int _tmain(int argc, TCHAR* argv[]) {
         _tprintf(TEXT("[ERRO]Código de erro: %lu\n", GetLastError()));
         exit(1);
     }
+    Sleep(1000);
     if (userServerData.players[0].mode != 0)
     {
         if (!ConnectNamedPipe(hPipe, NULL)) {
