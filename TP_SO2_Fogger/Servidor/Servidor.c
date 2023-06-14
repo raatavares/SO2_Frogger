@@ -372,6 +372,7 @@ int _tmain(int argc, TCHAR* argv[]) {
 #endif
 
 
+
     hOneServer = CreateMutex(NULL, TRUE, _T("OneServer"));
     if (GetLastError() == ERROR_ALREADY_EXISTS) {
         printf("Ja existe uma instancia do servidor em execução.\n");
@@ -495,13 +496,13 @@ int _tmain(int argc, TCHAR* argv[]) {
     _tprintf(TEXT("Cliente 1 conectado!\n"));
     userServerData.players[0].mode = 3;
     player pay;
-    _tprintf(TEXT("Modo inicial: %d\n", userServerData.players[0].mode));
+    _tprintf(TEXT("Modo inicial: %d\n"), &userServerData.players[0].mode);
     DWORD bytesRead;
-    if (ReadFile(hPipe, &pay, sizeof(player), &bytesRead, NULL)) {
-        _tprintf(TEXT("Modo escolhido pelo cliente: %d\n", pay.mode));
+    if (ReadFile(hPipe, (LPVOID)&pay, sizeof(player), &bytesRead, NULL)) {
+        _tprintf(TEXT("Modo escolhido pelo cliente: %d\n"), pay.mode);
     }
     else {
-        _tprintf(TEXT("Falha ao receber o inteiro. Código de erro: %lu\n", GetLastError()));
+        _tprintf(TEXT("Falha ao receber o inteiro. Código de erro: %lu\n"), GetLastError());
         exit(1);
     }
 
@@ -509,11 +510,11 @@ int _tmain(int argc, TCHAR* argv[]) {
     //userServerData.players[1].mode = userServerData.players[0].mode;
 
     DWORD bytesWrite;
-    if (WriteFile(hPipe, &userServerData.players[0], sizeof(player), &bytesWrite, NULL)) {
+    if (WriteFile(hPipe, (LPVOID)&userServerData.players[0], sizeof(player), &bytesWrite, NULL)) {
         _tprintf(TEXT("Cliente atribuido com: 'S'\n"));
     }
     else {
-        _tprintf(TEXT("[ERRO]Código de erro: %lu\n", GetLastError()));
+        _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
         exit(1);
     }
     Sleep(1000);
@@ -528,10 +529,10 @@ int _tmain(int argc, TCHAR* argv[]) {
 
         DWORD bytesRead;
         if (ReadFile(hPipe, &userServerData.players[1], sizeof(player), &bytesRead, NULL)) {
-            _tprintf(TEXT("Modo escolhido pelo cliente2: %d\n", userServerData.players[1].mode));
+            _tprintf(TEXT("Modo escolhido pelo cliente2: %d\n"), userServerData.players[1].mode);
         }
         else {
-            _tprintf(TEXT("Falha ao receber o inteiro. Código de erro: %lu\n", GetLastError()));
+            _tprintf(TEXT("Falha ao receber o inteiro. Código de erro: %lu\n"), GetLastError());
             exit(1);
         }
 
@@ -542,7 +543,7 @@ int _tmain(int argc, TCHAR* argv[]) {
             _tprintf(TEXT("Cliente atribuido com: 'S'\n"));
         }
         else {
-            _tprintf(TEXT("[ERRO]Código de erro: %lu\n", GetLastError()));
+            _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
             exit(1);
         }
 

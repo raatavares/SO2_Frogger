@@ -53,35 +53,46 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     //================================================================================================
 
     if (!WaitNamedPipe(starterPipe, NMPWAIT_WAIT_FOREVER)) {
-        _tprintf(TEXT("[ERRO] Ligar ao pipe '%s'! (WaitNamedPipe)\n"), starterPipe);
+        //_tprintf(TEXT("[ERRO] Ligar ao pipe '%s'! (WaitNamedPipe)\n"), starterPipe);
+        MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") starterPipe _T("! (WaitNamedPipe)"), _T("Erro"), MB_ICONERROR | MB_OK);
         exit(-1);
     }
 
-    _tprintf(TEXT("[LEITOR] Ligação ao pipe do escritor... (CreateFile)\n"));
+    //_tprintf(TEXT("[LEITOR] Ligação ao pipe do escritor... (CreateFile)\n"));
+    MessageBox(NULL, _T("[LEITOR] Ligação ao pipe do escritor... (CreateFile)"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
     hPipe = CreateFile(starterPipe, GENERIC_ALL, 0, NULL, OPEN_EXISTING,
         FILE_ATTRIBUTE_NORMAL, NULL);
     if (hPipe == NULL) {
-        _tprintf(TEXT("[ERRO] Ligar ao pipe '%s'! (CreateFile)\n"), starterPipe);
+        //_tprintf(TEXT("[ERRO] Ligar ao pipe '%s'! (CreateFile)\n"), starterPipe);
+        MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") starterPipe _T("'! (CreateFile)"), _T("Erro"), MB_ICONERROR | MB_OK);
         exit(-1);
     }
-    _tprintf(TEXT("[LEITOR] Liguei-me...\n"));
+    //_tprintf(TEXT("[LEITOR] Liguei-me...\n"));
+    MessageBox(NULL, _T("[LEITOR] Liguei-me..."), _T("Leitor"), MB_ICONQUESTION | MB_OK);
     // Aguardar a conexão de um cliente
     DWORD n;
     //coloca o modo escolhido no jogador
     jogador.mode = 1;
 
-    if (!WriteFile(hPipe, &jogador, sizeof(jogador), &n, NULL)) {
-        _tprintf(TEXT("[LEITOR] %d... (ReadFile)\n"), n);
+    if (!WriteFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
+      //  _tprintf(TEXT("[LEITOR] %d... (ReadFile)\n"), n);
+        MessageBox(NULL, _T("[LEITOR] "+ n) , _T("Erro"), MB_ICONERROR | MB_OK);
+
     }
-    _tprintf(TEXT("[CLIENTE] Modo escolhido: %d\n"), jogador.mode);
+    //_tprintf(TEXT("[CLIENTE] Modo escolhido: %d\n"), jogador.mode);
+    //MessageBox(NULL, str, _T("Leitor"), MB_ICONQUESTION | MB_OK);
+
 
     //recebe o modo escolhido pelo primeiro quer este seja o primeiro ou o segundo
     //tbm recebe o seu caracter unico
-    _tprintf(TEXT("[LEITOR] Recebi %d bytes: ''... (ReadFile)\n"), n);
-    if (!ReadFile(hPipe, &jogador, sizeof(jogador), &n, NULL)) {
-        _tprintf(TEXT("[LEITOR] %d... (ReadFile)\n"), n);
+    //_tprintf(TEXT("[LEITOR] Recebi %d bytes: ''... (ReadFile)\n"), n);
+    MessageBox(NULL, _T("[LEITOR] Recebi " + n), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+    if (!ReadFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
+        //_tprintf(TEXT("[LEITOR] %d... (ReadFile)\n"), n);
+        MessageBox(NULL, _T("[LEITOR]" + n), _T("Erro"), MB_ICONERROR | MB_OK);
+
     }
-    _tprintf(TEXT("[LEITOR] Recebi %d bytes: ''... (ReadFile)\n"), n);
+    //_tprintf(TEXT("[LEITOR] Recebi %d bytes: ''... (ReadFile)\n"), n);
     DisconnectNamedPipe(hPipe);
     
 
