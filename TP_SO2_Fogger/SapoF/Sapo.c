@@ -60,7 +60,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     //_tprintf(TEXT("[LEITOR] Ligação ao pipe do escritor... (CreateFile)\n"));
     MessageBox(NULL, _T("[LEITOR] Ligação ao pipe do escritor... (CreateFile)"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
-    hPipe = CreateFile(starterPipe, GENERIC_ALL, 0, NULL, OPEN_EXISTING,
+    hPipe = CreateFile(starterPipe, GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
         FILE_ATTRIBUTE_NORMAL, NULL);
     if (hPipe == NULL) {
         //_tprintf(TEXT("[ERRO] Ligar ao pipe '%s'! (CreateFile)\n"), starterPipe);
@@ -73,27 +73,29 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     DWORD n;
     //coloca o modo escolhido no jogador
     jogador.mode = 1;
-
+    //MessageBox(NULL, _T("[LEITOR] CARACTER:"), _T("Erro"), MB_ICONERROR | MB_OK);
     if (!WriteFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
       //  _tprintf(TEXT("[LEITOR] %d... (ReadFile)\n"), n);
-        MessageBox(NULL, _T("[LEITOR] "+ n) , _T("Erro"), MB_ICONERROR | MB_OK);
+        MessageBox(NULL, _T("[LEITOR] WRITE:"+ n) , _T("Erro"), MB_ICONERROR | MB_OK);
 
     }
+    MessageBox(NULL, _T("[LEITOR] WRITE:" + n), _T("Erro"), MB_ICONERROR | MB_OK);
     //_tprintf(TEXT("[CLIENTE] Modo escolhido: %d\n"), jogador.mode);
     //MessageBox(NULL, str, _T("Leitor"), MB_ICONQUESTION | MB_OK);
-
-
+    Sleep(1000);
     //recebe o modo escolhido pelo primeiro quer este seja o primeiro ou o segundo
     //tbm recebe o seu caracter unico
     //_tprintf(TEXT("[LEITOR] Recebi %d bytes: ''... (ReadFile)\n"), n);
-    MessageBox(NULL, _T("[LEITOR] Recebi " + n), _T("Leitor"), MB_ICONQUESTION | MB_OK);
-    if (!ReadFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
+    //MessageBox(NULL, _T("[LEITOR] Recebi " + n), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+    if (ReadFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
         //_tprintf(TEXT("[LEITOR] %d... (ReadFile)\n"), n);
-        MessageBox(NULL, _T("[LEITOR]" + n), _T("Erro"), MB_ICONERROR | MB_OK);
+
+        MessageBox(NULL, _T("[LEITOR]LEU: " + jogador.player_char), _T("Erro"), MB_ICONERROR | MB_OK);
 
     }
+    //MessageBox(NULL, _T("[LEITOR]LEU: " + jogador.player_char), _T("Erro"), MB_ICONERROR | MB_OK);
     //_tprintf(TEXT("[LEITOR] Recebi %d bytes: ''... (ReadFile)\n"), n);
-    DisconnectNamedPipe(hPipe);
+    //DisconnectNamedPipe(hPipe);
     
 
     //==================================================================================================================

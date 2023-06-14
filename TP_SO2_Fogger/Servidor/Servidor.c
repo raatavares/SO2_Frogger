@@ -495,18 +495,18 @@ int _tmain(int argc, TCHAR* argv[]) {
 
     _tprintf(TEXT("Cliente 1 conectado!\n"));
     userServerData.players[0].mode = 3;
-    player pay;
+    
     _tprintf(TEXT("Modo inicial: %d\n"), &userServerData.players[0].mode);
     DWORD bytesRead;
-    if (ReadFile(hPipe, (LPVOID)&pay, sizeof(player), &bytesRead, NULL)) {
-        _tprintf(TEXT("Modo escolhido pelo cliente: %d\n"), pay.mode);
+    if (ReadFile(hPipe, (LPVOID)&userServerData.players[0], sizeof(player), &bytesRead, NULL)) {
+        _tprintf(TEXT("Modo escolhido pelo cliente: %d\n"), userServerData.players[0].mode);
     }
     else {
         _tprintf(TEXT("Falha ao receber o inteiro. Código de erro: %lu\n"), GetLastError());
         exit(1);
     }
 
-    userServerData.players[0].player_char = _T("S");
+    userServerData.players[0].player_char = _T('S');
     //userServerData.players[1].mode = userServerData.players[0].mode;
 
     DWORD bytesWrite;
@@ -516,7 +516,9 @@ int _tmain(int argc, TCHAR* argv[]) {
     else {
         _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
         exit(1);
-    }
+    }    
+    DisconnectNamedPipe(hPipe);
+
     Sleep(1000);
     if (userServerData.players[0].mode != 0)
     {
@@ -540,7 +542,7 @@ int _tmain(int argc, TCHAR* argv[]) {
         userServerData.players[1].mode = userServerData.players[0].mode;
 
         if (WriteFile(hPipe, &userServerData.players[0], sizeof(player), &bytesWrite, NULL)) {
-            _tprintf(TEXT("Cliente atribuido com: 'S'\n"));
+            _tprintf(TEXT("Cliente atribuido com: 's'\n"));
         }
         else {
             _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
