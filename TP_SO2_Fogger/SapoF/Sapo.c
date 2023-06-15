@@ -26,6 +26,8 @@ void registerDialogClass(HINSTANCE);
 void displayDialog(HWND);
 HWND hName, hMainWindow;
 HMENU hMenu;
+TCHAR nomeS[50];
+TCHAR aux[250];
 
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -47,55 +49,23 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     {
         return FALSE;
     }
-    //jogador.mode = 3;
-
 
     //================================================================================================
 
     if (!WaitNamedPipe(starterPipe, NMPWAIT_WAIT_FOREVER)) {
-        //_tprintf(TEXT("[ERRO] Ligar ao pipe '%s'! (WaitNamedPipe)\n"), starterPipe);
         MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") starterPipe _T("! (WaitNamedPipe)"), _T("Erro"), MB_ICONERROR | MB_OK);
         exit(-1);
     }
 
-    //_tprintf(TEXT("[LEITOR] Ligação ao pipe do escritor... (CreateFile)\n"));
     MessageBox(NULL, _T("[LEITOR] Ligação ao pipe do escritor... (CreateFile)"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
     hPipe = CreateFile(starterPipe, GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
         FILE_ATTRIBUTE_NORMAL, NULL);
     if (hPipe == NULL) {
-        //_tprintf(TEXT("[ERRO] Ligar ao pipe '%s'! (CreateFile)\n"), starterPipe);
-        MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") starterPipe _T("'! (CreateFile)"), _T("Erro"), MB_ICONERROR | MB_OK);
+        MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") starterPipe _T("! (CreateFile)"), _T("Erro"), MB_ICONERROR | MB_OK);
         exit(-1);
     }
-    //_tprintf(TEXT("[LEITOR] Liguei-me...\n"));
     MessageBox(NULL, _T("[LEITOR] Liguei-me..."), _T("Leitor"), MB_ICONQUESTION | MB_OK);
-    // Aguardar a conexão de um cliente
-    DWORD n;
-    //coloca o modo escolhido no jogador
-    jogador.mode = 1;
-    //MessageBox(NULL, _T("[LEITOR] CARACTER:"), _T("Erro"), MB_ICONERROR | MB_OK);
-    if (!WriteFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
-      //  _tprintf(TEXT("[LEITOR] %d... (ReadFile)\n"), n);
-        MessageBox(NULL, _T("[LEITOR] WRITE:"+ n) , _T("Erro"), MB_ICONERROR | MB_OK);
-
-    }
-    MessageBox(NULL, _T("[LEITOR] WRITE:" + n), _T("Erro"), MB_ICONERROR | MB_OK);
-    //_tprintf(TEXT("[CLIENTE] Modo escolhido: %d\n"), jogador.mode);
-    //MessageBox(NULL, str, _T("Leitor"), MB_ICONQUESTION | MB_OK);
-    Sleep(1000);
-    //recebe o modo escolhido pelo primeiro quer este seja o primeiro ou o segundo
-    //tbm recebe o seu caracter unico
-    //_tprintf(TEXT("[LEITOR] Recebi %d bytes: ''... (ReadFile)\n"), n);
-    //MessageBox(NULL, _T("[LEITOR] Recebi " + n), _T("Leitor"), MB_ICONQUESTION | MB_OK);
-    if (ReadFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
-        //_tprintf(TEXT("[LEITOR] %d... (ReadFile)\n"), n);
-
-        MessageBox(NULL, _T("[LEITOR]LEU: " + jogador.player_char), _T("Erro"), MB_ICONERROR | MB_OK);
-
-    }
-    //MessageBox(NULL, _T("[LEITOR]LEU: " + jogador.player_char), _T("Erro"), MB_ICONERROR | MB_OK);
-    //_tprintf(TEXT("[LEITOR] Recebi %d bytes: ''... (ReadFile)\n"), n);
-    //DisconnectNamedPipe(hPipe);
+    
     
 
     //==================================================================================================================
@@ -187,6 +157,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    int value;
+
     switch (message)
     {
     case WM_COMMAND:
@@ -199,7 +171,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 MessageBeep(MB_OK);
                 break;
             case SAIR_BUTTON:
-                int value = MessageBox(hWnd, TEXT("Tem a certeza que deseja sair?"), TEXT("Confirmação"), MB_ICONQUESTION | MB_YESNO);
+                value = MessageBox(hWnd, TEXT("Tem a certeza que deseja sair?"), TEXT("Confirmação"), MB_ICONQUESTION | MB_YESNO);
                 if (value == IDYES)
                 {
                     DestroyWindow(hWnd);
@@ -268,11 +240,45 @@ LRESULT CALLBACK DialogProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         switch (wParam)
         {
         case INDIVIDUAL_BUTTOM:
-            //jogador.mode = 0;
-            //WriteFile(hPipe, (LPVOID)&jogador.mode, sizeof(jogador.mode), &n, NULL);
-            EnableWindow(hMainWindow, TRUE);
-            DestroyWindow(hWnd);
-            MessageBeep(MB_OK);
+            GetWindowText(hName, nomeS, sizeof(nomeS) / sizeof(nomeS[0]));
+            if (_tcscmp(nomeS, TEXT("")))
+            {
+                MessageBox(NULL, nomeS, _T("NOME"), MB_ICONQUESTION | MB_OK);
+
+                ///*********************************************
+            
+                //coloca o modo escolhido no jogador
+                jogador.mode = 0;
+                if (!WriteFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
+                    MessageBox(NULL, _T("[ERRO] Erro na escrita (jogador.mode)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                    exit(-2);
+                }
+                MessageBox(NULL, _T("[LEITOR] Escrita bem sucedida!"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+
+                Sleep(1000);
+
+                //Recebe o seu caracter unico
+                if (!ReadFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
+                    MessageBox(NULL, _T("[ERRO] Erro na leitura (jogador.player_char)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                    exit(-2);
+                }
+                MessageBox(NULL, jogador.player_char, _T("LEU: "), MB_ICONQUESTION | MB_OK);
+                //MessageBox(NULL, _T("[LEITOR]LEU: " + jogador.player_char), _T("Erro"), MB_ICONERROR | MB_OK);
+                //_tprintf(TEXT("[LEITOR] Recebi %d bytes: ''... (ReadFile)\n"), n);
+                //DisconnectNamedPipe(hPipe);
+
+
+                ///*********************************************
+
+                EnableWindow(hMainWindow, TRUE);
+                DestroyWindow(hWnd);
+                MessageBeep(MB_OK);
+            }
+            else
+            {
+                MessageBox(NULL, _T("Tem de preencher o nome!"), _T("[ERRO] - Nome"), MB_ICONERROR | MB_OK);
+            }
+            
             break;
         case COMPETICAO_BUTTOM:
             EnableWindow(hMainWindow, TRUE);
@@ -308,8 +314,7 @@ void displayDialog(HWND hWnd) {
 
 
     CreateWindow(TEXT("Static"), TEXT("Enter text here:"), WS_VISIBLE | WS_CHILD | SS_CENTER, 30, 110, 110, 20, hDld, NULL, NULL, NULL);
-    /*hName = */
-    CreateWindow(TEXT("Edit"), NULL, WS_VISIBLE | WS_CHILD | WS_BORDER, 140, 110, 200, 20, hDld, NULL, NULL, NULL);
+    hName = CreateWindow(TEXT("Edit"), NULL, WS_VISIBLE | WS_CHILD | WS_BORDER, 140, 110, 200, 20, hDld, NULL, NULL, NULL);
     CreateWindow(TEXT("Static"), TEXT("Modalidade de jogo:"), WS_VISIBLE | WS_CHILD | SS_CENTER, 15, 160, 150, 20, hDld, NULL, NULL, NULL);
     CreateWindow(TEXT("Button"), TEXT("Individual"), WS_VISIBLE | WS_CHILD, 165, 160, 100, 20, hDld, (HMENU)INDIVIDUAL_BUTTOM, NULL, NULL);
     CreateWindow(TEXT("Button"), TEXT("Competição"), WS_VISIBLE | WS_CHILD, 265, 160, 100, 20, hDld, (HMENU)COMPETICAO_BUTTOM, NULL, NULL);
