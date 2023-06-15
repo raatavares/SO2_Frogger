@@ -52,20 +52,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     //================================================================================================
 
-    if (!WaitNamedPipe(starterPipe, NMPWAIT_WAIT_FOREVER)) {
-        MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") starterPipe _T("! (WaitNamedPipe)"), _T("Erro"), MB_ICONERROR | MB_OK);
-        exit(-1);
-    }
-
-    MessageBox(NULL, _T("[LEITOR] Ligação ao pipe do escritor... (CreateFile)"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
-    hPipe = CreateFile(starterPipe, GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
-        FILE_ATTRIBUTE_NORMAL, NULL);
-    if (hPipe == NULL) {
-        MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") starterPipe _T("! (CreateFile)"), _T("Erro"), MB_ICONERROR | MB_OK);
-        exit(-1);
-    }
-    MessageBox(NULL, _T("[LEITOR] Liguei-me..."), _T("Leitor"), MB_ICONQUESTION | MB_OK);
-    
+   
     
 
     //==================================================================================================================
@@ -248,6 +235,20 @@ LRESULT CALLBACK DialogProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                 ///*********************************************
             
                 //coloca o modo escolhido no jogador
+                if (!WaitNamedPipe(starterPipe, NMPWAIT_WAIT_FOREVER)) {
+                    MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") starterPipe _T("! (WaitNamedPipe)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                    exit(-1);
+                }
+
+                MessageBox(NULL, _T("[LEITOR] Ligação ao pipe do escritor... (CreateFile)"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+                hPipe = CreateFile(starterPipe, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
+                    FILE_ATTRIBUTE_NORMAL, NULL);
+                if (hPipe == NULL) {
+                    MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") starterPipe _T("! (CreateFile)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                    exit(-1);
+                }
+                MessageBox(NULL, _T("[LEITOR] Liguei-me..."), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+
                 jogador.mode = 0;
                 if (!WriteFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
                     MessageBox(NULL, _T("[ERRO] Erro na escrita (jogador.mode)"), _T("Erro"), MB_ICONERROR | MB_OK);
@@ -258,21 +259,24 @@ LRESULT CALLBACK DialogProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                 Sleep(1000);
 
                 //Recebe o seu caracter unico
-                if (!ReadFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
-                    MessageBox(NULL, _T("[ERRO] Erro na leitura (jogador.player_char)"), _T("Erro"), MB_ICONERROR | MB_OK);
-                    exit(-2);
+                if (ReadFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
+                    MessageBox(NULL, _T("[LEITOR]LEU: " + jogador.player_char), _T("Erro"), MB_ICONERROR | MB_OK);
+
+                    //MessageBox(NULL, _T("[ERRO] Erro na leitura (jogador.player_char)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                    //exit(-2);
                 }
-                MessageBox(NULL, jogador.player_char, _T("LEU: "), MB_ICONQUESTION | MB_OK);
+                //MessageBox(NULL, jogador.player_char, _T("LEU: "), MB_ICONQUESTION | MB_OK);
                 //MessageBox(NULL, _T("[LEITOR]LEU: " + jogador.player_char), _T("Erro"), MB_ICONERROR | MB_OK);
                 //_tprintf(TEXT("[LEITOR] Recebi %d bytes: ''... (ReadFile)\n"), n);
                 //DisconnectNamedPipe(hPipe);
 
 
                 ///*********************************************
-
+                DisconnectNamedPipe(hPipe);
                 EnableWindow(hMainWindow, TRUE);
                 DestroyWindow(hWnd);
                 MessageBeep(MB_OK);
+
             }
             else
             {

@@ -479,7 +479,7 @@ int _tmain(int argc, TCHAR* argv[]) {
 
     hPipe = CreateNamedPipe(starterPipe, PIPE_ACCESS_DUPLEX, PIPE_WAIT |
         PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE, 1,
-        sizeof(pipe_user_server), sizeof(pipe_user_server), 1000, NULL);
+        sizeof(player), sizeof(player), 1000, NULL);
     if (hPipe == INVALID_HANDLE_VALUE) {
         _tprintf(TEXT("[ERRO] Criar Named Pipe! (CreateNamedPipe)"));
         exit(-1);
@@ -505,7 +505,7 @@ int _tmain(int argc, TCHAR* argv[]) {
         _tprintf(TEXT("Falha ao receber o inteiro. Código de erro: %lu\n"), GetLastError());
         exit(1);
     }
-
+    Sleep(1000);
     userServerData.players[0].player_char = _T('S');
     //userServerData.players[1].mode = userServerData.players[0].mode;
 
@@ -516,8 +516,7 @@ int _tmain(int argc, TCHAR* argv[]) {
     else {
         _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
         exit(1);
-    }    
-    DisconnectNamedPipe(hPipe);
+    }
 
     Sleep(1000);
     if (userServerData.players[0].mode != 0)
