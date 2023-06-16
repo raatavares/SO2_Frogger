@@ -28,7 +28,68 @@ BOOL putSapo(TCHAR** board, int numFaixas, int cols) {
     return TRUE;
 }
 
-DWORD WINAPI ThreadAceitaUsers(LPVOID param) {
+DWORD WINAPI ThreadMapToUser(LPVOID param) {
+    data* dados = (data*)param;
+    HANDLE hPipe[2];
+
+
+
+    hPipe[0] = CreateNamedPipe(sendMapTo_S_Pipe, PIPE_ACCESS_OUTBOUND, PIPE_WAIT |
+        PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE, 1,
+        sizeof(data), sizeof(data), 1000, NULL);
+    if (hPipe == INVALID_HANDLE_VALUE) {
+        _tprintf(TEXT("[ERRO] Criar Named Pipe! (CreateNamedPipe)"));
+        exit(-1);
+    }
+
+    _tprintf(TEXT("Aguardando conexão do cliente...\n"));
+
+    if (!ConnectNamedPipe(hPipe[0], NULL)) {
+        _tprintf(TEXT("[ERRO] Ligação ao leitor! (ConnectNamedPipe)\n"));
+        exit(-1);
+    }
+
+    if (dados->modo==1){//multiplayer
+        hPipe[1] = CreateNamedPipe(sendMapTo_s_Pipe, PIPE_ACCESS_OUTBOUND, PIPE_WAIT |
+            PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE, 1,
+            sizeof(data), sizeof(data), 1000, NULL);
+        if (hPipe == INVALID_HANDLE_VALUE) {
+            _tprintf(TEXT("[ERRO] Criar Named Pipe! (CreateNamedPipe)"));
+            exit(-1);
+        }
+
+        _tprintf(TEXT("Aguardando conexão do cliente...\n"));
+
+        if (!ConnectNamedPipe(hPipe[1], NULL)) {
+            _tprintf(TEXT("[ERRO] Ligação ao leitor! (ConnectNamedPipe)\n"));
+            exit(-1);
+        }
+
+    }
+
+
+    DWORD bytesWrite;
+    do
+    {
+        _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
+        if (WriteFile(hPipe[0], (LPVOID)&dados, sizeof(data), &bytesWrite, NULL)) {
+                                                                                        //cliente 1
+            _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
+            exit(1);
+        }
+        if (dados->modo == 1) {//entra se multiplayer
+            if (WriteFile(hPipe[1], (LPVOID)&dados, sizeof(data), &bytesWrite, NULL)) {
+                                                                                        //cliente 2
+                _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
+                exit(1);
+            }
+        }
+        Sleep(500);
+    } while (_tcscmp(dados->command, TEXT("sair")));
+
+
+
+    ExitThread(0);
 
 }
 
@@ -358,7 +419,7 @@ int _tmain(int argc, TCHAR* argv[]) {
     TCHAR par_nome[TAM] = TEXT("SOFTWARE\\Frogger\\velocidade");
     TCHAR command[TAM];
     DWORD par_valor;
-    HANDLE hRowThread[MAXFAIXAS], hUIThread, hMapThread, hBufferThread, hCriaSaposThread;//THREADS
+    HANDLE hRowThread[MAXFAIXAS], hUIThread, hMapThread, hBufferThread, hCriaSaposThread, hThreadMapToUsers;// THREADS
     HANDLE hPipe;//PIPES
 
 
@@ -472,7 +533,7 @@ int _tmain(int argc, TCHAR* argv[]) {
         UnmapViewOfFile(pDados.board);
         return 1;
     }
-
+    areaJogo = createBoard(numFaixas, cols);
     //------- sapos --------
     userServerData.jogo = pDados.jogo;
 
@@ -549,11 +610,13 @@ int _tmain(int argc, TCHAR* argv[]) {
         }
 
     }//ja estao os dois/um com as informaçoes criadas basta agora criar os pipes individuais
-
+    dados[0].modo = userServerData.players[0].mode;
+    hThreadMapToUsers = CreateThread(NULL, 0, ThreadMapToUser, &dados[0], 0, NULL);
+    
 
 
     //---------------------------
-
+    
     hGlobalEvent= CreateEvent(NULL, TRUE, FALSE, NULL);
     if (hGlobalEvent == NULL) {
         _tprintf(TEXT("Erro a criar o evento\n"));
@@ -565,7 +628,7 @@ int _tmain(int argc, TCHAR* argv[]) {
         return 1;
     }
 
-    areaJogo = createBoard(numFaixas, cols);
+    
     
     if(!putSapo(areaJogo, numFaixas, cols)) _tprintf(TEXT("\nNão há espaço "));
     if (!putSapo(areaJogo, numFaixas, cols)) _tprintf(TEXT("\nNão há espaço "));
@@ -627,7 +690,7 @@ int _tmain(int argc, TCHAR* argv[]) {
     WaitForSingleObject(hUIThread, INFINITE);
     WaitForSingleObject(hMapThread, INFINITE);
     WaitForSingleObject(hBufferThread, INFINITE);
-
+    WaitForSingleObject(hThreadMapToUsers, INFINITE);
 
     //fechar handlers e memoria dinamica
     UnmapViewOfFile(pDados.board);
@@ -636,6 +699,8 @@ int _tmain(int argc, TCHAR* argv[]) {
     CloseHandle(hUIThread);
     CloseHandle(hMapThread);
     CloseHandle(hBufferThread);
+    CloseHandle(hThreadMapToUsers);
+
 
     for (int i = 0; i < (numFaixas + 2); i++) {
         free(areaJogo[i]);

@@ -2,6 +2,6 @@
   Sapo.c
 C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\SapoF\Sapo.c(214,41): warning C4047: 'função': 'UINT_PTR' difere em níveis de indireção de 'void *'
 C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\SapoF\Sapo.c(214,37): warning C4024: 'AppendMenuW': tipos diferentes para parâmetro formal e real 3
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\SapoF\Sapo.c(314,20): warning C4133: 'função': tipos incompatíveis - de 'WNDCLASSEX *' para 'const WNDCLASSW *'
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\SapoF\Sapo.c(303): warning C4715: 'DialogProcedure': nem todos os caminhos de controle retornam um valor
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\SapoF\Sapo.c(313,20): warning C4133: 'função': tipos incompatíveis - de 'WNDCLASSEX *' para 'const WNDCLASSW *'
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\SapoF\Sapo.c(302): warning C4715: 'DialogProcedure': nem todos os caminhos de controle retornam um valor
   SapoF.vcxproj -> C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\x64\Debug\Sapo.exe

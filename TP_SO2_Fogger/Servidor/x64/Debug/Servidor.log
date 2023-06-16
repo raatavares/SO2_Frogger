@@ -1,25 +1,24 @@
 ﻿  Servidor.c
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(213,30): warning C4047: '=': 'int' difere em níveis de indireção de 'int *'
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(192,11): warning C4101: 'limpeza': variável local não referenciada
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(260,9): warning C4033: 'ThreadBuffer' deve retornar um valor
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(265,9): warning C4033: 'ThreadBuffer' deve retornar um valor
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(270,9): warning C4033: 'ThreadBuffer' deve retornar um valor
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(275,9): warning C4033: 'ThreadBuffer' deve retornar um valor
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(248,12): warning C4101: 'hThreadCountdown': variável local não referenciada
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(499,14): warning C4477: 'wprintf': a cadeia de formato '%d' requer um argumento do tipo 'int', mas um argumento variadic 1 tem o tipo 'int *'
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(499,14): warning C4313: 'wprintf': '%d' na cadeia de formato está em conflito com o argumento 1 do tipo 'int *'
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(540,56): warning C4047: '=': 'TCHAR' difere em níveis de indireção de 'unsigned short [2]'
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(562,44): warning C4020: 'CreateMutexW': muitos parâmetros reais
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(582,37): warning C4047: '=': 'int *' difere em níveis de indireção de 'int'
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(589,31): warning C4047: '=': 'int *' difere em níveis de indireção de 'int'
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(594,43): warning C4113: 'DWORD (__cdecl *)(LPVOID,LPVOID)' difere em listas de parâmetro de 'LPTHREAD_START_ROUTINE'
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(594,72): warning C4047: 'função': 'DWORD' difere em níveis de indireção de 'mapping *'
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(594,65): warning C4024: 'CreateThread': tipos diferentes para parâmetro formal e real 5
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(594,77): warning C4020: 'CreateThread': muitos parâmetros reais
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(360,11): warning C4101: 'par_valor': variável local não referenciada
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(361,73): warning C4101: 'hCriaSaposThread': variável local não referenciada
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(351,11): warning C4101: 'resultado': variável local não referenciada
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(347,9): warning C4101: 'Mode': variável local não referenciada
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(33): warning C4716: 'ThreadAceitaUsers': deve retornar um valor
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(342): warning C4715: 'ThreadBuffer': nem todos os caminhos de controle retornam um valor
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(274,30): warning C4047: '=': 'int' difere em níveis de indireção de 'int *'
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(253,11): warning C4101: 'limpeza': variável local não referenciada
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(321,9): warning C4033: 'ThreadBuffer' deve retornar um valor
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(326,9): warning C4033: 'ThreadBuffer' deve retornar um valor
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(331,9): warning C4033: 'ThreadBuffer' deve retornar um valor
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(336,9): warning C4033: 'ThreadBuffer' deve retornar um valor
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(309,12): warning C4101: 'hThreadCountdown': variável local não referenciada
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(560,14): warning C4477: 'wprintf': a cadeia de formato '%d' requer um argumento do tipo 'int', mas um argumento variadic 1 tem o tipo 'int *'
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(560,14): warning C4313: 'wprintf': '%d' na cadeia de formato está em conflito com o argumento 1 do tipo 'int *'
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(601,56): warning C4047: '=': 'TCHAR' difere em níveis de indireção de 'unsigned short [2]'
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(625,44): warning C4020: 'CreateMutexW': muitos parâmetros reais
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(645,37): warning C4047: '=': 'int *' difere em níveis de indireção de 'int'
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(652,31): warning C4047: '=': 'int *' difere em níveis de indireção de 'int'
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(657,43): warning C4113: 'DWORD (__cdecl *)(LPVOID,LPVOID)' difere em listas de parâmetro de 'LPTHREAD_START_ROUTINE'
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(657,72): warning C4047: 'função': 'DWORD' difere em níveis de indireção de 'mapping *'
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(657,65): warning C4024: 'CreateThread': tipos diferentes para parâmetro formal e real 5
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(657,77): warning C4020: 'CreateThread': muitos parâmetros reais
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(421,11): warning C4101: 'par_valor': variável local não referenciada
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(422,73): warning C4101: 'hCriaSaposThread': variável local não referenciada
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(412,11): warning C4101: 'resultado': variável local não referenciada
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(408,9): warning C4101: 'Mode': variável local não referenciada
+C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\Servidor\Servidor.c(403): warning C4715: 'ThreadBuffer': nem todos os caminhos de controle retornam um valor
   Servidor.vcxproj -> C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\x64\Debug\Servidor.exe

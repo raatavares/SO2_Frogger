@@ -16,6 +16,8 @@
 
 #define PATH_DLL TEXT("..\\x64\\Debug\\DLL.dll")
 #define starterPipe TEXT("\\\\.\\pipe\\teste")
+#define sendMapTo_S_Pipe TEXT("\\\\.\\pipe\\map_S")
+#define sendMapTo_s_Pipe TEXT("\\\\.\\pipe\\map_s")
 
 
 
@@ -26,6 +28,7 @@ typedef struct {
 	int faixaNumero, faixaVelocidade;
 	TCHAR* command;
 	int* TERMINAR;
+	int modo;
 } data;
 
 typedef struct {
