@@ -30,13 +30,25 @@ BOOL putSapo(TCHAR** board, int numFaixas, int cols) {
 
 DWORD WINAPI ThreadMapToUser(LPVOID param) {
     data* dados = (data*)param;
+    matriz dadosPassados;
     HANDLE hPipe[2];
-
+    dadosPassados.terminar = 1;
+    dadosPassados.rows = dados->rows;
+    dadosPassados.cols = dados->cols;
+    for (int i = 0; i < dados->rows; i++) {
+        for (int j = 0; j < dados->cols; j++) {
+            dadosPassados.board[i][j] = dados->board[i][j];
+        }
+    }
+    if (!_tcscmp(dados->command, TEXT("sair"))) {
+        dadosPassados.terminar = 0;
+        
+    }
 
 
     hPipe[0] = CreateNamedPipe(sendMapTo_S_Pipe, PIPE_ACCESS_OUTBOUND, PIPE_WAIT |
         PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE, 1,
-        sizeof(data), sizeof(data), 1000, NULL);
+        sizeof(matriz), sizeof(matriz), 1000, NULL);
     if (hPipe == INVALID_HANDLE_VALUE) {
         _tprintf(TEXT("[ERRO] Criar Named Pipe! (CreateNamedPipe)"));
         exit(-1);
@@ -52,7 +64,7 @@ DWORD WINAPI ThreadMapToUser(LPVOID param) {
     if (dados->modo==1){//multiplayer
         hPipe[1] = CreateNamedPipe(sendMapTo_s_Pipe, PIPE_ACCESS_OUTBOUND, PIPE_WAIT |
             PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE, 1,
-            sizeof(data), sizeof(data), 1000, NULL);
+            sizeof(matriz), sizeof(matriz), 1000, NULL);
         if (hPipe == INVALID_HANDLE_VALUE) {
             _tprintf(TEXT("[ERRO] Criar Named Pipe! (CreateNamedPipe)"));
             exit(-1);
@@ -72,13 +84,13 @@ DWORD WINAPI ThreadMapToUser(LPVOID param) {
     do
     {
         _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
-        if (WriteFile(hPipe[0], (LPVOID)&dados, sizeof(data), &bytesWrite, NULL)) {
+        if (WriteFile(hPipe[0], (LPVOID)&dados, sizeof(matriz), &bytesWrite, NULL)) {
                                                                                         //cliente 1
             _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
             exit(1);
         }
         if (dados->modo == 1) {//entra se multiplayer
-            if (WriteFile(hPipe[1], (LPVOID)&dados, sizeof(data), &bytesWrite, NULL)) {
+            if (WriteFile(hPipe[1], (LPVOID)&dados, sizeof(matriz), &bytesWrite, NULL)) {
                                                                                         //cliente 2
                 _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
                 exit(1);
