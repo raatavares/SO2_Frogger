@@ -334,8 +334,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         TextOut(backBufferDC, textX, textY, nomeS, lstrlen(nomeS));
 
-
-
             if (!IsWindow(hSecondWindow)) {             
                 for (int i = 0; i < board->rows; i++) {
                     for (int j = 0; j < board->cols; j++) {
@@ -348,8 +346,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                             BitBlt(backBufferDC, rect.left, rect.top, 100, 100, hdcPedra, 0, 0, SRCCOPY);
                         else if (caract == 'S')
                             BitBlt(backBufferDC, rect.left, rect.top, 100, 100, hdcSapo, 0, 0, SRCCOPY);
-                        else if (caract == '<' || caract == '>')
+                        else if (caract == '<')
                             BitBlt(backBufferDC, rect.left, rect.top, 100, 100, hdcCarro, 0, 0, SRCCOPY);
+                        else if (caract == '>')
+                            StretchBlt(backBufferDC, rect.left, rect.top, -100, 100, hdcCarro, 0, 0, 100, 100, SRCCOPY);
                         xPos = xPos + 2;
                     }
                     yPos = yPos + 2;
@@ -362,6 +362,56 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             EndPaint(hWnd, &ps);
             break;
         }
+    case WM_KEYDOWN:
+    {
+        DWORD n;
+        int keyCode = wParam;
+
+        if (keyCode == VK_LEFT || keyCode == VK_RIGHT || keyCode == VK_UP || keyCode == VK_DOWN)
+        {
+            switch (keyCode)
+            {
+            case VK_LEFT:
+                //MessageBox(hWnd, TEXT("Tecla esquerda pressionada"), TEXT("Tecla de Direção"), MB_OK);
+                jogador.move = 'L';
+                if (!WriteFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
+                    MessageBox(NULL, _T("[ERRO] Erro na escrita (jogador.move)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                    exit(-4);
+                }
+                MessageBox(NULL, _T("[LEITOR] Escrita bem sucedida!"), _T("TECLA"), MB_ICONQUESTION | MB_OK);
+                break;
+            case VK_RIGHT:
+                //MessageBox(hWnd, TEXT("Tecla direita pressionada"), TEXT("Tecla de Direção"), MB_OK);
+                jogador.move = 'R';
+                if (!WriteFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
+                    MessageBox(NULL, _T("[ERRO] Erro na escrita (jogador.move)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                    exit(-4);
+                }
+                MessageBox(NULL, _T("[LEITOR] Escrita bem sucedida!"), _T("TECLA"), MB_ICONQUESTION | MB_OK);
+                break;
+            case VK_UP:
+                //MessageBox(hWnd, TEXT("Tecla cima pressionada"), TEXT("Tecla de Direção"), MB_OK);
+                jogador.move = 'U';
+                if (!WriteFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
+                    MessageBox(NULL, _T("[ERRO] Erro na escrita (jogador.move)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                    exit(-4);
+                }
+                MessageBox(NULL, _T("[LEITOR] Escrita bem sucedida!"), _T("TECLA"), MB_ICONQUESTION | MB_OK);
+                break;
+            case VK_DOWN:
+                //MessageBox(hWnd, TEXT("Tecla baixo pressionada"), TEXT("Tecla de Direção"), MB_OK);
+                jogador.move = 'D';
+                if (!WriteFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
+                    MessageBox(NULL, _T("[ERRO] Erro na escrita (jogador.move)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                    exit(-4);
+                }
+                MessageBox(NULL, _T("[LEITOR] Escrita bem sucedida!"), _T("TECLA"), MB_ICONQUESTION | MB_OK);
+                break;
+            }
+        }
+
+        break;
+    }
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
