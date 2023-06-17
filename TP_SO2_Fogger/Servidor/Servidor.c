@@ -241,9 +241,10 @@ DWORD WINAPI ThreadRow(LPVOID param) {
 
             }
         }
+        Sleep(100);
         ReleaseMutex(dados->hMutex);
 
-        //Sleep(dados->faixaVelocidade);
+        Sleep(dados->faixaVelocidade);
 
         //exit(4);
 
