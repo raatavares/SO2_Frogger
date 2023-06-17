@@ -33,7 +33,7 @@ HWND hName, hMainWindow, hSecondWindow;
 HMENU hMenu;
 TCHAR nomeS[50];
 TCHAR caracterUnic;
-HANDLE hThreadAtualizaMapa;
+HANDLE hThreadAtualizaMapa, hThreadTime;
 
 
 BITMAP bmp;
@@ -43,6 +43,28 @@ HDC* memDC;
 //Icones
 HBITMAP hParede, hSapo, hCarro, hPedra;
 HDC hdcParede, hdcSapo, hdcCarro, hdcPedra;
+
+// Função para a thread que decrementa o tempo
+int timeconta = 20;
+DWORD WINAPI TimeThread(LPVOID param) {
+
+    while (1)
+    {
+        Sleep(1000); // Aguarda 1 segundo
+
+        timeconta--; // Decrementa o tempo
+
+        if (timeconta == 0)
+        {
+            // Tempo chegou a zero, exibe a mensagem "Game Over"
+            MessageBox(NULL, TEXT("Game Over"), TEXT("Tempo esgotado"), MB_OK);
+            break;
+        }
+    }
+
+    ExitThread(0);
+}
+
 
 DWORD WINAPI ThreadAtualizaMapa(LPVOID param) {
     //matriz* matrizMap = ((matriz*)param);
@@ -334,7 +356,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         TextOut(backBufferDC, textX, textY, nomeS, lstrlen(nomeS));
 
-            if (!IsWindow(hSecondWindow)) {             
+            if (!IsWindow(hSecondWindow)) {      
+                if (jogador.mode == 0) {
+                    textX = textX + 600; // Posição X do texto
+                    textY = textY + 450; // Posição Y do texto
+                    TCHAR valorString[20]; // Definir um tamanho suficiente para a string
+                    wsprintf(valorString, TEXT("Time: %d s"), timeconta);
+                    TextOut(backBufferDC, textX, textY, valorString, lstrlen(valorString));
+                }
                 for (int i = 0; i < board->rows; i++) {
                     for (int j = 0; j < board->cols; j++) {
                         caract = board->board[i][j];
@@ -492,7 +521,13 @@ LRESULT CALLBACK DialogProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
                 hThreadAtualizaMapa = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ThreadAtualizaMapa, (LPVOID)&matrizMapa, 0, NULL);
                 if (hThreadAtualizaMapa == NULL) {
-                    _tprintf(TEXT("\n[ERRO] Erro ao lançar Thread!\n"));
+                    _tprintf(TEXT("\n[ERRO] Erro ao lançar ThreadAtualizaMapa!\n"));
+                    return 0;
+                }
+
+                hThreadTime = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TimeThread, (LPVOID)NULL, 0, NULL);
+                if (hThreadTime == NULL) {
+                    _tprintf(TEXT("\n[ERRO] Erro ao lançar TimeThread!\n"));
                     return 0;
                 }
 
@@ -518,6 +553,7 @@ LRESULT CALLBACK DialogProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     case WM_CLOSE:
         DisconnectNamedPipe(hPipe);
         TerminateThread(hThreadAtualizaMapa, 0);
+        TerminateThread(hThreadTime, 0);
         EnableWindow(hMainWindow, TRUE);
         DestroyWindow(hWnd);
         break;
