@@ -1,7 +1,9 @@
-﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(517,5): warning MSB8028: O diretório intermediário (x64\Debug\) contém arquivos compartilhados de outro projeto (SapoF.vcxproj). Isso pode levar a um comportamento incorreto de limpeza e recompilação.
+﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(534,5): warning MSB8028: O diretório intermediário (x64\Debug\) contém arquivos compartilhados de outro projeto (SapoF.vcxproj). Isso pode levar a um comportamento incorreto de limpeza e recompilação.
   Sapo.c
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\SapoF\Sapo.c(214,41): warning C4047: 'função': 'UINT_PTR' difere em níveis de indireção de 'void *'
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\SapoF\Sapo.c(214,37): warning C4024: 'AppendMenuW': tipos diferentes para parâmetro formal e real 3
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\SapoF\Sapo.c(313,20): warning C4133: 'função': tipos incompatíveis - de 'WNDCLASSEX *' para 'const WNDCLASSW *'
-C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\SapoF\Sapo.c(302): warning C4715: 'DialogProcedure': nem todos os caminhos de controle retornam um valor
-  SapoF.vcxproj -> C:\Users\Danie\Documents\GitHub\SO2_Frogger\TP_SO2_Fogger\x64\Debug\Sapo.exe
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\SapoF\Sapo.c(225,10): warning C4101: 'hText': variável local não referenciada
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\SapoF\Sapo.c(229,13): warning C4101: 'hBmp': variável local não referenciada
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\SapoF\Sapo.c(378,41): warning C4047: 'função': 'UINT_PTR' difere em níveis de indireção de 'void *'
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\SapoF\Sapo.c(378,37): warning C4024: 'AppendMenuW': tipos diferentes para parâmetro formal e real 3
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\SapoF\Sapo.c(487,27): warning C4133: 'função': tipos incompatíveis - de 'WNDCLASSEX *' para 'const WNDCLASSW *'
+C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\SapoF\Sapo.c(476): warning C4715: 'DialogProcedure': nem todos os caminhos de controle retornam um valor
+  SapoF.vcxproj -> C:\Users\ricar\OneDrive\Documentos\GitHub\SO2_Frogger\TP_SO2_Fogger\x64\Debug\Sapo.exe

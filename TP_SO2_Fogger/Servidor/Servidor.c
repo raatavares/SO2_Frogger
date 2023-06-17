@@ -29,27 +29,20 @@ BOOL putSapo(TCHAR** board, int numFaixas, int cols) {
 }
 
 DWORD WINAPI ThreadMapToUser(LPVOID param) {
-    data* dados = (data*)param;
-    matriz dadosPassados;
+    data* dados = (data*)((LPVOID*)param)[0];
+    mapping* pDados = (mapping*)((LPVOID*)param)[1];
     HANDLE hPipe[2];
-    dadosPassados.terminar = 1;
-    dadosPassados.rows = dados->rows;
-    dadosPassados.cols = dados->cols;
-    for (int i = 0; i < dados->rows; i++) {
-        for (int j = 0; j < dados->cols; j++) {
-            dadosPassados.board[i][j] = dados->board[i][j];
-        }
-    }
-    if (!_tcscmp(dados->command, TEXT("sair"))) {
-        dadosPassados.terminar = 0;
-        
-    }
 
-
+    hMutexPipe = CreateMutex(NULL, FALSE, TEXT("TP_MUTEX_CONSUMIDOR"));
+    if (hMutexPipe == NULL) {
+        _tprintf(TEXT("Erro no CreateMutex\n"));
+        return -1;
+    }
+    
     hPipe[0] = CreateNamedPipe(sendMapTo_S_Pipe, PIPE_ACCESS_OUTBOUND, PIPE_WAIT |
         PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE, 1,
         sizeof(matriz), sizeof(matriz), 1000, NULL);
-    if (hPipe == INVALID_HANDLE_VALUE) {
+    if (hPipe[0] == INVALID_HANDLE_VALUE) {
         _tprintf(TEXT("[ERRO] Criar Named Pipe! (CreateNamedPipe)"));
         exit(-1);
     }
@@ -65,7 +58,7 @@ DWORD WINAPI ThreadMapToUser(LPVOID param) {
         hPipe[1] = CreateNamedPipe(sendMapTo_s_Pipe, PIPE_ACCESS_OUTBOUND, PIPE_WAIT |
             PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE, 1,
             sizeof(matriz), sizeof(matriz), 1000, NULL);
-        if (hPipe == INVALID_HANDLE_VALUE) {
+        if (hPipe[1] == INVALID_HANDLE_VALUE) {
             _tprintf(TEXT("[ERRO] Criar Named Pipe! (CreateNamedPipe)"));
             exit(-1);
         }
@@ -79,27 +72,27 @@ DWORD WINAPI ThreadMapToUser(LPVOID param) {
 
     }
 
-
     DWORD bytesWrite;
     do
     {
-        _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
-        if (WriteFile(hPipe[0], (LPVOID)&dados, sizeof(matriz), &bytesWrite, NULL)) {
+        WaitForSingleObject(hMutexPipe, INFINITE);
+        if (!WriteFile(hPipe[0], (LPVOID)pDados->board, sizeof(matriz), &bytesWrite, NULL)) {
                                                                                         //cliente 1
             _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
-            exit(1);
+            exit(4);
         }
         if (dados->modo == 1) {//entra se multiplayer
-            if (WriteFile(hPipe[1], (LPVOID)&dados, sizeof(matriz), &bytesWrite, NULL)) {
+            if (!WriteFile(hPipe[1], (LPVOID)pDados->board, sizeof(pDados->board), &bytesWrite, NULL)) {
                                                                                         //cliente 2
                 _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
                 exit(1);
             }
         }
+        ReleaseMutex(hMutexPipe);
         Sleep(500);
     } while (_tcscmp(dados->command, TEXT("sair")));
 
-
+    
 
     ExitThread(0);
 
@@ -250,17 +243,19 @@ DWORD WINAPI ThreadRow(LPVOID param) {
         }
         ReleaseMutex(dados->hMutex);
 
-        Sleep(dados->faixaVelocidade);
+        //Sleep(dados->faixaVelocidade);
 
+        //exit(4);
 
     } while (_tcscmp(dados->command, TEXT("sair")));
     
     ExitThread(0);
     return 0;
 }
-DWORD WINAPI ThreadMapping(LPVOID param) {
+DWORD WINAPI ThreadMapping(LPVOID param, LPVOID map) {
     int fim;
     mapping* dados = (mapping*)param;
+    matriz* matrizMap = (matriz*)map;
     matriz dadosPassados;
     TCHAR limpeza[20];
 
@@ -288,8 +283,10 @@ DWORD WINAPI ThreadMapping(LPVOID param) {
 
         if (PAUSE == 0) {
             SetEvent(dados->sharedMapEvent);
+         //   SetEvent(matrizMap->hMapaLidoEvent);
             Sleep(500);
             ResetEvent(dados->sharedMapEvent);
+          //  ResetEvent(matrizMap->hMapaLidoEvent);
         }
 
 
@@ -433,6 +430,7 @@ int _tmain(int argc, TCHAR* argv[]) {
     DWORD par_valor;
     HANDLE hRowThread[MAXFAIXAS], hUIThread, hMapThread, hBufferThread, hCriaSaposThread, hThreadMapToUsers;// THREADS
     HANDLE hPipe;//PIPES
+    matriz matrizMap;
 
 
     pipe_user_server userServerData;
@@ -533,6 +531,18 @@ int _tmain(int argc, TCHAR* argv[]) {
     }
     SetEvent(pDados.sharedMapEvent);
 
+    matrizMap.hMapaLidoEvent = CreateEvent(
+        NULL,
+        TRUE,
+        FALSE,
+        TEXT("ATUALIZAMAP_EVENTO_USER"));
+
+    if (matrizMap.hMapaLidoEvent == NULL) {
+        _tprintf(TEXT("Erro no CreateEvent\n"));
+        return 1;
+    }
+    //SetEvent(matrizMap.hMapaLidoEvent);
+
 
 
     pDados.hMutex = CreateMutex(
@@ -623,7 +633,11 @@ int _tmain(int argc, TCHAR* argv[]) {
 
     }//ja estao os dois/um com as informaçoes criadas basta agora criar os pipes individuais
     dados[0].modo = userServerData.players[0].mode;
-    hThreadMapToUsers = CreateThread(NULL, 0, ThreadMapToUser, &dados[0], 0, NULL);
+    LPVOID params[2];
+    params[0] = &dados[0];
+    params[1] = &pDados;
+    pDados.TERMINAR = 5;
+    hThreadMapToUsers = CreateThread(NULL, 0, ThreadMapToUser, params, 0, NULL);
     
 
 
@@ -662,7 +676,7 @@ int _tmain(int argc, TCHAR* argv[]) {
 
     hUIThread = CreateThread(NULL, 0, ThreadUI, &dados, 0, NULL);
     pDados.TERMINAR = TERMINAR;
-    hMapThread = CreateThread(NULL, 0, ThreadMapping, &pDados, 0, NULL);
+    hMapThread = CreateThread(NULL, 0, ThreadMapping, &pDados, &matrizMap, 0, NULL);
     //----- BUFFER ------
 
 

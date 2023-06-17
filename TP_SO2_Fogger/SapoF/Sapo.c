@@ -1,6 +1,7 @@
 #include "framework.h"
 #include "Sapo.h"
 #include "..\\DLL\Header.h"
+#include <new.h>
 
 #define MAX_LOADSTRING 100
 #define SAIR_BUTTON 0
@@ -11,6 +12,10 @@
 
 //DADOS dados;
 player jogador;
+pipe_user_server dadosMap;
+matriz* board;
+
+matriz matrizMapa;
 
 // Variáveis Globais:
 HINSTANCE hInst;                                // instância atual
@@ -24,11 +29,78 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 void AddMenu(HWND);
 void registerDialogClass(HINSTANCE);
 void displayDialog(HWND);
-HWND hName, hMainWindow;
+HWND hName, hMainWindow, hSecondWindow;
 HMENU hMenu;
 TCHAR nomeS[50];
-TCHAR aux[250];
+TCHAR caracterUnic;
+HANDLE hThreadAtualizaMapa;
 
+
+BITMAP bmp;
+HDC bmpDC;
+HDC* memDC;
+
+//Icones
+HBITMAP hParede, hSapo, hCarro, hPedra;
+HDC hdcParede, hdcSapo, hdcCarro, hdcPedra;
+
+DWORD WINAPI ThreadAtualizaMapa(LPVOID param) {
+    //matriz* matrizMap = ((matriz*)param);
+    DWORD n;
+    board = (matriz*)malloc(sizeof(matriz));
+    int teste = 0;
+    HANDLE hPipe1;
+
+
+    matrizMapa.hMapaLidoEvent = CreateEvent(
+        NULL,
+        TRUE,
+        FALSE,
+        TEXT("ATUALIZAMAP_EVENTO_USER"));
+
+    if (matrizMapa.hMapaLidoEvent == NULL) {
+        MessageBox(NULL, _T("[ERRO] Erro no CreateEvent (hMapaLidoEvent)"), _T("Erro"), MB_ICONERROR | MB_OK);
+        return 1;
+    }
+    //SetEvent(matrizMapa.hMapaLidoEvent);
+    //ResetEvent(matrizMapa.hMapaLidoEvent);
+
+    if (!WaitNamedPipe(sendMapTo_S_Pipe, NMPWAIT_WAIT_FOREVER)) {
+        _tprintf(TEXT("[ERRO] Ligar ao pipe '%s'! (WaitNamedPipe)\n"), sendMapTo_S_Pipe);
+        return 0;
+    }
+    _tprintf(TEXT("[ConTaxi] Ligação ao pipe da Central...\n"));
+    hPipe1 = CreateFile(sendMapTo_S_Pipe, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hPipe1 == NULL) {
+        _tprintf(TEXT("[ERRO] Ligar ao pipe '%s'! (CreateFile)\n"), sendMapTo_S_Pipe);
+        return 0;
+    }
+
+    _tprintf(TEXT("Criou pipe conexão do cliente...\n"));
+
+
+    while (1) {
+        WaitForSingleObject(hMutexPipe, INFINITE);
+
+        WaitForSingleObject(board->hMapaLidoEvent, INFINITE);
+
+        if (!IsWindow(hSecondWindow)) {
+            // A janela foi destruída, faça algo aqui
+            if (!ReadFile(hPipe1, (LPVOID)board, sizeof(matriz), &n, NULL)) {
+                MessageBox(NULL, _T("[ERRO] Erro na leitura (matriz)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                exit(-2);
+            }
+
+        }
+
+        InvalidateRect(hMainWindow, NULL, FALSE);
+        ReleaseMutex(hMutexPipe);
+       // UpdateWindow(hMainWindow);
+    }
+    Sleep(500);
+
+    ExitThread(0);
+}
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -52,7 +124,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     //================================================================================================
 
-   
+    //hMapaLidoEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
     
 
     //==================================================================================================================
@@ -119,7 +191,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    hInst = hInstance; // Armazenar o identificador de instância em nossa variável global
 
    hMainWindow = CreateWindowW(szWindowClass, TEXT("Sapo"), WS_OVERLAPPEDWINDOW,
-      500, 0, 600, 600, NULL, NULL, hInstance, NULL);
+      450, 0, 700, 600, NULL, NULL, hInstance, NULL);
 
    if (!hMainWindow)
    {
@@ -145,6 +217,29 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     int value;
+    //matriz matrizMapa;
+
+    HDC hdc;
+    PAINTSTRUCT ps;
+    HFONT hFont;
+    HWND hText;
+
+    RECT rect;
+    static HDC bmpDC;
+    HBITMAP hBmp;
+    static BITMAP bmp;
+    static HDC backBufferDC = NULL;
+    static HBITMAP hBackBuffer = NULL;
+
+    static HDC memDC = NULL;
+    TCHAR caract;
+    int xPos = 0, yPos = 0;
+
+    // Defina a fonte para o texto
+    hFont = CreateFont(16, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+        ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+        DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
+        TEXT("Arial"));
 
     switch (message)
     {
@@ -175,6 +270,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_CREATE: {
+        AddMenu(hWnd);
+        hdc = GetDC(hWnd);
+        GetClientRect(hWnd, &rect);
+
+        backBufferDC = CreateCompatibleDC(hdc);
+        hBackBuffer = CreateCompatibleBitmap(hdc, rect.right, rect.bottom);
+        SelectObject(backBufferDC, hBackBuffer);
+
+        hdcCarro = CreateCompatibleDC(hdc);
+        hCarro = (HBITMAP)LoadImage(GetModuleHandle(NULL), TEXT("carro.bmp"), IMAGE_BITMAP, 40, 20, LR_LOADFROMFILE);
+        SelectObject(hdcCarro, hCarro);
+
+        hdcSapo = CreateCompatibleDC(hdc);
+        hSapo = (HBITMAP)LoadImage(GetModuleHandle(NULL), TEXT("sapo.bmp"), IMAGE_BITMAP, 25, 20, LR_LOADFROMFILE);
+        SelectObject(hdcSapo, hSapo);
+
+        hdcPedra = CreateCompatibleDC(hdc);
+        hPedra = (HBITMAP)LoadImage(GetModuleHandle(NULL), TEXT("pedra.bmp"), IMAGE_BITMAP, 25, 20, LR_LOADFROMFILE);
+        SelectObject(hdcPedra, hPedra);
+
+        hdcParede = CreateCompatibleDC(hdc);
+        hParede = (HBITMAP)LoadImage(GetModuleHandle(NULL), TEXT("parede.bmp"), IMAGE_BITMAP, 25, 20, LR_LOADFROMFILE);
+        SelectObject(hdcParede, hParede);
+
+        ReleaseDC(hWnd, backBufferDC);
+
         displayDialog(hWnd);
         break;
     }
@@ -190,13 +311,56 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
     case WM_PAINT:
         {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: Adicione qualquer código de desenho que use hdc aqui...
-            AddMenu(hWnd);
-            EndPaint(hWnd, &ps);
+        hdc = BeginPaint(hWnd, &ps);
+        GetClientRect(hWnd, &rect);
+
+        if (backBufferDC == NULL)
+        {
+            backBufferDC = CreateCompatibleDC(hdc);
+            hBackBuffer = CreateCompatibleBitmap(hdc, rect.right, rect.bottom);
+            SelectObject(backBufferDC, hBackBuffer);
         }
-        break;
+
+        FillRect(backBufferDC, &rect, (HBRUSH)(WHITE_BRUSH));
+        SetBkMode(backBufferDC, TRANSPARENT);
+
+        // Defina a posição do texto no canto superior esquerdo
+        int textX = 5; // Posição X do texto
+        int textY = 5; // Posição Y do texto
+        SelectObject(backBufferDC, hFont);
+        SetTextColor(backBufferDC, RGB(0, 0, 0));
+        SetBkColor(backBufferDC, RGB(255, 255, 255)); // Defina a cor de fundo como branco
+
+        TextOut(backBufferDC, textX, textY, nomeS, lstrlen(nomeS));
+
+
+
+            if (!IsWindow(hSecondWindow)) {             
+                for (int i = 0; i < board->rows; i++) {
+                    for (int j = 0; j < board->cols; j++) {
+                        caract = board->board[i][j];
+                        rect.left = 40 + (15 * xPos);
+                        rect.top = 100 + (10 * yPos);
+                        if (caract == '_' || caract == '-')
+                            BitBlt(backBufferDC, rect.left, rect.top, 100, 100, hdcParede, 0, 0, SRCCOPY);
+                        else if (caract == 'x')
+                            BitBlt(backBufferDC, rect.left, rect.top, 100, 100, hdcPedra, 0, 0, SRCCOPY);
+                        else if (caract == 'S')
+                            BitBlt(backBufferDC, rect.left, rect.top, 100, 100, hdcSapo, 0, 0, SRCCOPY);
+                        else if (caract == '<' || caract == '>')
+                            BitBlt(backBufferDC, rect.left, rect.top, 100, 100, hdcCarro, 0, 0, SRCCOPY);
+                        xPos = xPos + 2;
+                    }
+                    yPos = yPos + 2;
+                    xPos = 0;
+                }
+            }
+
+            BitBlt(hdc, 0, 0, rect.right, rect.bottom, backBufferDC, 0, 0, SRCCOPY);
+
+            EndPaint(hWnd, &ps);
+            break;
+        }
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
@@ -259,23 +423,31 @@ LRESULT CALLBACK DialogProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                 Sleep(1000);
 
                 //Recebe o seu caracter unico
-                if (ReadFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
-                    MessageBox(NULL, _T("[LEITOR]LEU: " + jogador.player_char), _T("Erro"), MB_ICONERROR | MB_OK);
-
-                    //MessageBox(NULL, _T("[ERRO] Erro na leitura (jogador.player_char)"), _T("Erro"), MB_ICONERROR | MB_OK);
-                    //exit(-2);
+                if (!ReadFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
+                    MessageBox(NULL, _T("[ERRO] Erro na leitura (jogador.player_char)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                    exit(-2);
                 }
-                //MessageBox(NULL, jogador.player_char, _T("LEU: "), MB_ICONQUESTION | MB_OK);
-                //MessageBox(NULL, _T("[LEITOR]LEU: " + jogador.player_char), _T("Erro"), MB_ICONERROR | MB_OK);
-                //_tprintf(TEXT("[LEITOR] Recebi %d bytes: ''... (ReadFile)\n"), n);
-                //DisconnectNamedPipe(hPipe);
+                caracterUnic = jogador.player_char;
+                MessageBox(NULL, &caracterUnic, _T("LEU: "), MB_ICONQUESTION | MB_OK);
 
 
                 ///*********************************************
-                DisconnectNamedPipe(hPipe);
+                
+
+                //SetEvent(hMapaLidoEvent);
+
                 EnableWindow(hMainWindow, TRUE);
                 DestroyWindow(hWnd);
-                MessageBeep(MB_OK);
+
+                hThreadAtualizaMapa = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ThreadAtualizaMapa, (LPVOID)&matrizMapa, 0, NULL);
+                if (hThreadAtualizaMapa == NULL) {
+                    _tprintf(TEXT("\n[ERRO] Erro ao lançar Thread!\n"));
+                    return 0;
+                }
+
+
+                //InvalidateRect(hMainWindow, NULL, TRUE);
+                //UpdateWindow(hMainWindow);
 
             }
             else
@@ -293,6 +465,8 @@ LRESULT CALLBACK DialogProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         }
         break;
     case WM_CLOSE:
+        DisconnectNamedPipe(hPipe);
+        TerminateThread(hThreadAtualizaMapa, 0);
         EnableWindow(hMainWindow, TRUE);
         DestroyWindow(hWnd);
         break;
@@ -314,34 +488,14 @@ void registerDialogClass(HINSTANCE hInst) {
 }
 
 void displayDialog(HWND hWnd) {
-    HWND hDld = CreateWindowW(TEXT("myDialogClass"), TEXT("Dialog"), WS_VISIBLE | WS_OVERLAPPEDWINDOW, 600, 100, 400, 400, hWnd, NULL, NULL, NULL);
+    hSecondWindow = CreateWindowW(TEXT("myDialogClass"), TEXT("Dialog"), WS_VISIBLE | WS_OVERLAPPEDWINDOW, 600, 100, 400, 400, hWnd, NULL, NULL, NULL);
 
 
-    CreateWindow(TEXT("Static"), TEXT("Enter text here:"), WS_VISIBLE | WS_CHILD | SS_CENTER, 30, 110, 110, 20, hDld, NULL, NULL, NULL);
-    hName = CreateWindow(TEXT("Edit"), NULL, WS_VISIBLE | WS_CHILD | WS_BORDER, 140, 110, 200, 20, hDld, NULL, NULL, NULL);
-    CreateWindow(TEXT("Static"), TEXT("Modalidade de jogo:"), WS_VISIBLE | WS_CHILD | SS_CENTER, 15, 160, 150, 20, hDld, NULL, NULL, NULL);
-    CreateWindow(TEXT("Button"), TEXT("Individual"), WS_VISIBLE | WS_CHILD, 165, 160, 100, 20, hDld, (HMENU)INDIVIDUAL_BUTTOM, NULL, NULL);
-    CreateWindow(TEXT("Button"), TEXT("Competição"), WS_VISIBLE | WS_CHILD, 265, 160, 100, 20, hDld, (HMENU)COMPETICAO_BUTTOM, NULL, NULL);
+    CreateWindow(TEXT("Static"), TEXT("Enter text here:"), WS_VISIBLE | WS_CHILD | SS_CENTER, 30, 110, 110, 20, hSecondWindow, NULL, NULL, NULL);
+    hName = CreateWindow(TEXT("Edit"), NULL, WS_VISIBLE | WS_CHILD | WS_BORDER, 140, 110, 200, 20, hSecondWindow, NULL, NULL, NULL);
+    CreateWindow(TEXT("Static"), TEXT("Modalidade de jogo:"), WS_VISIBLE | WS_CHILD | SS_CENTER, 15, 160, 150, 20, hSecondWindow, NULL, NULL, NULL);
+    CreateWindow(TEXT("Button"), TEXT("Individual"), WS_VISIBLE | WS_CHILD, 165, 160, 100, 20, hSecondWindow, (HMENU)INDIVIDUAL_BUTTOM, NULL, NULL);
+    CreateWindow(TEXT("Button"), TEXT("Competição"), WS_VISIBLE | WS_CHILD, 265, 160, 100, 20, hSecondWindow, (HMENU)COMPETICAO_BUTTOM, NULL, NULL);
 
     EnableWindow(hWnd, FALSE);
 }
-
-/*
-void recebeMapa(DADOS* dados) {
-    DWORD n;
-    if (!WaitNamedPipe(PIPE_NAME, NMPWAIT_WAIT_FOREVER)) {
-        _tprintf(TEXT("[ERRO] Ligar ao pipe '%s'!\n"), PIPE_NAME);
-        return 0;
-    }
-    _tprintf(TEXT("[ConPass] Ligação ao pipe da Central...\n"));
-    hPipe = CreateFile(PIPE_NAME, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    if (hPipe == NULL) {
-        _tprintf(TEXT("[ERRO] Ligar ao pipe '%s'!\n"), PIPE_NAME);
-        return 0;
-    }
-
-    ReadFile(hPipe, dados->mapa, sizeof(MAPA), &n, NULL);
-    
-    return;
-}
-*/

@@ -20,7 +20,6 @@
 #define sendMapTo_s_Pipe TEXT("\\\\.\\pipe\\map_s")
 
 
-
 typedef struct {
 	HANDLE hEvent, hMutex;
 	TCHAR** board;
@@ -34,6 +33,7 @@ typedef struct {
 typedef struct {
 	TCHAR board[10][20];
 	int rows, cols, terminar;
+	HANDLE hMapaLidoEvent;
 } matriz;
 
 typedef struct {
@@ -71,6 +71,8 @@ typedef struct {
 	player players[2];
 	data* jogo;
 } pipe_user_server;
+
+HANDLE hMutexPipe;
 
 //Mapping BufferCircular
 HANDLE hFileBuffer;
