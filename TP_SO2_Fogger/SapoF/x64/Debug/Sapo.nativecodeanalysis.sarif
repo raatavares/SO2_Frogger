@@ -1,0 +1,825 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
+  "runs": [
+    {
+      "results": [
+        {
+          "ruleId": "C6011",
+          "message": {
+            "text": "Desreferenciando ponteiro NULL \"board\". "
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                },
+                "region": {
+                  "startLine": 124,
+                  "startColumn": 9,
+                  "endLine": 124,
+                  "endColumn": 52
+                }
+              },
+              "logicalLocations": [
+                {
+                  "fullyQualifiedName": "ThreadAtualizaMapa",
+                  "decoratedName": "ThreadAtualizaMapa",
+                  "kind": "function"
+                }
+              ]
+            }
+          ],
+          "codeFlows": [
+            {
+              "threadFlows": [
+                {
+                  "locations": [
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 76,
+                            "startColumn": 11
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 77,
+                            "startColumn": 11
+                          }
+                        },
+                        "message": {
+                          "text": "\"board\" pode ser NULL"
+                        }
+                      },
+                      "kinds": [
+                        "declaration"
+                      ],
+                      "importance": "essential"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 78,
+                            "startColumn": 9
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 79,
+                            "startColumn": 12
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 82,
+                            "startColumn": 31
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 88,
+                            "startColumn": 35
+                          }
+                        },
+                        "message": {
+                          "text": "Ignorar esta ramificação, (supor que \"<condição do ramo>\" é falso)"
+                        }
+                      },
+                      "kinds": [
+                        "branch"
+                      ],
+                      "importance": "important"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 95,
+                            "startColumn": 19
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 101,
+                            "startColumn": 23
+                          }
+                        },
+                        "message": {
+                          "text": "Ignorar esta ramificação, (supor que \"gameOverEvent==(((void *)0))\" é falso)"
+                        }
+                      },
+                      "kinds": [
+                        "branch"
+                      ],
+                      "importance": "important"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 106,
+                            "startColumn": 9
+                          }
+                        },
+                        "message": {
+                          "text": "Ignorar esta ramificação, (supor que \"<condição do ramo>\" é falso)"
+                        }
+                      },
+                      "kinds": [
+                        "branch"
+                      ],
+                      "importance": "important"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 110,
+                            "startColumn": 5
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 111,
+                            "startColumn": 12
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 112,
+                            "startColumn": 16
+                          }
+                        },
+                        "message": {
+                          "text": "Ignorar esta ramificação, (supor que \"hPipe1==(((void *)0))\" é falso)"
+                        }
+                      },
+                      "kinds": [
+                        "branch"
+                      ],
+                      "importance": "important"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 117,
+                            "startColumn": 5
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 118,
+                            "startColumn": 11
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 119,
+                            "startColumn": 9
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 119,
+                            "startColumn": 21
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 121,
+                            "startColumn": 12
+                          }
+                        },
+                        "message": {
+                          "text": "Entrar neste loop, (supor \"1\")"
+                        }
+                      },
+                      "kinds": [
+                        "branch"
+                      ],
+                      "importance": "important"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 122,
+                            "startColumn": 9
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 124,
+                            "startColumn": 9
+                          }
+                        },
+                        "message": {
+                          "text": "\"board\" não está referenciado, mas ainda pode ser NULL"
+                        }
+                      },
+                      "kinds": [
+                        "usage"
+                      ],
+                      "importance": "essential"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "ruleId": "C6387",
+          "message": {
+            "text": "'_Param_(3)' pode ser '0'."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                },
+                "region": {
+                  "startLine": 398,
+                  "startColumn": 9,
+                  "endLine": 398,
+                  "endColumn": 48
+                }
+              },
+              "logicalLocations": [
+                {
+                  "fullyQualifiedName": "WndProc",
+                  "decoratedName": "WndProc",
+                  "kind": "function"
+                }
+              ]
+            }
+          ],
+          "codeFlows": [
+            {
+              "threadFlows": [
+                {
+                  "locations": [
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 293,
+                            "startColumn": 9
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 296,
+                            "startColumn": 9
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 297,
+                            "startColumn": 17
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 298,
+                            "startColumn": 11
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 299,
+                            "startColumn": 10
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 301,
+                            "startColumn": 10
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 302,
+                            "startColumn": 16
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 303,
+                            "startColumn": 13
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 304,
+                            "startColumn": 19
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 305,
+                            "startColumn": 16
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 306,
+                            "startColumn": 20
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 308,
+                            "startColumn": 16
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 309,
+                            "startColumn": 11
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 310,
+                            "startColumn": 9
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 310,
+                            "startColumn": 19
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 313,
+                            "startColumn": 11
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 318,
+                            "startColumn": 13
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 386,
+                            "startColumn": 5
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 388,
+                            "startColumn": 13
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 389,
+                            "startColumn": 9
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 391,
+                            "startColumn": 26
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                          },
+                          "region": {
+                            "startLine": 398,
+                            "startColumn": 9
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "ruleId": "C6258",
+          "message": {
+            "text": "Usar TerminateThread não permite uma limpeza adequada da thread."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                },
+                "region": {
+                  "startLine": 632,
+                  "startColumn": 9,
+                  "endLine": 632,
+                  "endColumn": 46
+                }
+              },
+              "logicalLocations": [
+                {
+                  "fullyQualifiedName": "DialogProcedure",
+                  "decoratedName": "DialogProcedure",
+                  "kind": "function"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "ruleId": "C6258",
+          "message": {
+            "text": "Usar TerminateThread não permite uma limpeza adequada da thread."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+                },
+                "region": {
+                  "startLine": 633,
+                  "startColumn": 9,
+                  "endLine": 633,
+                  "endColumn": 38
+                }
+              },
+              "logicalLocations": [
+                {
+                  "fullyQualifiedName": "DialogProcedure",
+                  "decoratedName": "DialogProcedure",
+                  "kind": "function"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "tool": {
+        "driver": {
+          "name": "PREfast",
+          "fullName": "PREfast Code Analysis",
+          "version": "14.33.31630.0",
+          "informationUri": "https://aka.ms/cpp/ca"
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "artifacts": [
+        {
+          "location": {
+            "uri": "file:///C:/Users/ricar/OneDrive/Documentos/GitHub/SO2_Frogger/TP_SO2_Fogger/SapoF/Sapo.c"
+          },
+          "roles": [
+            "analysisTarget",
+            "resultFile"
+          ],
+          "hashes": {
+            "sha-256": "9a611d81701b62ed848a4d98b995c3bd0e582afb362b27b130f0e24a1648516a"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/ricar/onedrive/documentos/github/so2_frogger/tp_so2_fogger/sapof/framework.h"
+          },
+          "hashes": {
+            "sha-256": "bc5b20d8da4e31802d0a21560f2bb89acdfdd31600cd9a6cbbadc10b40f0389c"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/ricar/onedrive/documentos/github/so2_frogger/tp_so2_fogger/sapof/targetver.h"
+          },
+          "hashes": {
+            "sha-256": "51332d1ea8c211231cb2b8dfd5eab850676b09dec0ccf2a714657f87dbf14465"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/ricar/onedrive/documentos/github/so2_frogger/tp_so2_fogger/sapof/sapo.h"
+          },
+          "hashes": {
+            "sha-256": "b32175608f9dc518034f2d6cd95263442f9ed455f3ea94ebf821cd1d397f1e21"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/ricar/onedrive/documentos/github/so2_frogger/tp_so2_fogger/sapof/resource.h"
+          },
+          "hashes": {
+            "sha-256": "cbec03ccab21fb7b980c665ae4d1f40976bc73c362b7d6ffecdf421fead60dac"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/ricar/onedrive/documentos/github/so2_frogger/tp_so2_fogger/dll/header.h"
+          },
+          "hashes": {
+            "sha-256": "38316262662b4cc4162355f1296734cf3f73e72b3efc25c21d0391e70b76ad0b"
+          }
+        }
+      ]
+    }
+  ]
+}

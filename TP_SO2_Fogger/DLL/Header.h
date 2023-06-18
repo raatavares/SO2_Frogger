@@ -16,11 +16,11 @@
 
 #define PATH_DLL TEXT("..\\x64\\Debug\\DLL.dll")
 #define starterPipe TEXT("\\\\.\\pipe\\teste")
-#define sendMapTo_S_Pipe TEXT("\\\\.\\pipe\\map_S")
-#define sendMapTo_s_Pipe TEXT("\\\\.\\pipe\\map_s")
+#define sendMapTo_S_Pipe TEXT("\\\\.\\pipe\\map_S1")
+#define sendMapTo_s_Pipe TEXT("\\\\.\\pipe\\map_s2")
 
-#define receiveInputOf_S_Pipe TEXT("\\\\.\\pipe\\input_S")
-#define receiveInputOf_s_Pipe TEXT("\\\\.\\pipe\\input_s")
+#define receiveInputOf_S_Pipe TEXT("\\\\.\\pipe\\input_S1")
+#define receiveInputOf_s_Pipe TEXT("\\\\.\\pipe\\input_s2")
 
 
 typedef struct {
@@ -79,6 +79,7 @@ HANDLE hMutexPipe;
 HANDLE gameOverEvent;
 HANDLE venceuSEvent;
 HANDLE venceusEvent;
+HANDLE comecouEvent;
 
 //Mapping BufferCircular
 HANDLE hFileBuffer;

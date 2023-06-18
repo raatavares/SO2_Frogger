@@ -75,8 +75,10 @@ DWORD WINAPI ThreadUserInput(LPVOID param) {
             if (!ReadFile(hPipe[0], (LPVOID)&dados->players[0], sizeof(dados->players[0]), &bytesRead, NULL)) {
                 //cliente 1
                 _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
-                exit(4);
+                exit(1);
             }
+            if(dados->players[0].move == _T('U'))
+                _tprintf(TEXT("\n[Cima]\n"));
             if (dados->players[0].mode == 1) {//entra se multiplayer
                 if (!ReadFile(hPipe[1], (LPVOID)&dados->players[1], sizeof(dados->players[1]), &bytesRead, NULL)) {
                     //cliente 2
@@ -131,7 +133,7 @@ DWORD WINAPI ThreadMapToUser(LPVOID param) {
             sizeof(matriz), sizeof(matriz), 1000, NULL);
         if (hPipe[1] == INVALID_HANDLE_VALUE) {
             _tprintf(TEXT("[ERRO] Criar Named Pipe! (CreateNamedPipe)"));
-            exit(-1);
+            exit(-9);
         }
 
         _tprintf(TEXT("Aguardando conexão do cliente...\n"));
@@ -700,11 +702,18 @@ int _tmain(int argc, TCHAR* argv[]) {
     Sleep(1000);
     if (userServerData.players[0].mode != 0)
     {
-        if (!ConnectNamedPipe(hPipe, NULL)) {
-            _tprintf(TEXT("[ERRO] Ligação ao leitor! (ConnectNamedPipe)\n"));
-            exit(-1);
-        }
+        _tprintf(TEXT("A espera de Cliente 2!\n"));
+        comecouEvent = CreateEvent(
+            NULL,
+            TRUE,
+            FALSE,
+            TEXT("COMECOU_EVENTO_USER"));
 
+        if (comecouEvent == NULL) {
+            _tprintf(TEXT("Erro no CreateEvent\n"));
+            return 1;
+        }
+        WaitForSingleObject(comecouEvent, INFINITE);
         _tprintf(TEXT("Cliente 2 conectado!\n"));
 
         venceusEvent = CreateEvent(
@@ -718,25 +727,8 @@ int _tmain(int argc, TCHAR* argv[]) {
             return 1;
         }
 
-        DWORD bytesRead;
-        if (ReadFile(hPipe, &userServerData.players[1], sizeof(player), &bytesRead, NULL)) {
-            _tprintf(TEXT("Modo escolhido pelo cliente2: %d\n"), userServerData.players[1].mode);
-        }
-        else {
-            _tprintf(TEXT("Falha ao receber o inteiro. Código de erro: %lu\n"), GetLastError());
-            exit(1);
-        }
-
         userServerData.players[1].player_char = _T("s");
         userServerData.players[1].mode = userServerData.players[0].mode;
-
-        if (WriteFile(hPipe, &userServerData.players[0], sizeof(player), &bytesWrite, NULL)) {
-            _tprintf(TEXT("Cliente atribuido com: 's'\n"));
-        }
-        else {
-            _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
-            exit(1);
-        }
 
     }//ja estao os dois/um com as informaçoes criadas basta agora criar os pipes individuais
     dados[0].modo = userServerData.players[0].mode;

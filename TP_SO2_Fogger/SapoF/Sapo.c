@@ -14,8 +14,11 @@
 player jogador;
 pipe_user_server dadosMap;
 matriz* board;
+HANDLE hPipeComand;
 
 matriz matrizMapa;
+
+HANDLE hSemInstancias;
 
 // Variáveis Globais:
 HINSTANCE hInst;                                // instância atual
@@ -101,15 +104,29 @@ DWORD WINAPI ThreadAtualizaMapa(LPVOID param) {
         return 1;
     }
 
-    if (!WaitNamedPipe(sendMapTo_S_Pipe, NMPWAIT_WAIT_FOREVER)) {
-        _tprintf(TEXT("[ERRO] Ligar ao pipe '%s'! (WaitNamedPipe)\n"), sendMapTo_S_Pipe);
-        return 0;
+    if (caracterUnic == 'S') {
+        if (!WaitNamedPipe(sendMapTo_S_Pipe, NMPWAIT_WAIT_FOREVER)) {
+            //MessageBox(NULL, TEXT("[ERRO] Ligar ao pipe " +GetLastError() "! (WaitNamedPipe)"), _T("Erro"), MB_ICONERROR | MB_OK);
+            return 0;
+        }
+        _tprintf(TEXT("[ConTaxi] Ligação ao pipe da Central...\n"));
+        hPipe1 = CreateFile(sendMapTo_S_Pipe, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+        if (hPipe1 == NULL) {
+            _tprintf(TEXT("[ERRO] Ligar ao pipe '%s'! (CreateFile)\n"), sendMapTo_S_Pipe);
+            return 0;
+        }
     }
-    _tprintf(TEXT("[ConTaxi] Ligação ao pipe da Central...\n"));
-    hPipe1 = CreateFile(sendMapTo_S_Pipe, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    if (hPipe1 == NULL) {
-        _tprintf(TEXT("[ERRO] Ligar ao pipe '%s'! (CreateFile)\n"), sendMapTo_S_Pipe);
-        return 0;
+    else {
+        if (!WaitNamedPipe(sendMapTo_s_Pipe, NMPWAIT_WAIT_FOREVER)) {
+            //MessageBox(NULL, TEXT("[ERRO] Ligar ao pipe " + GetLastError() "! (WaitNamedPipe)"), _T("Erro"), MB_ICONERROR | MB_OK);
+            return 0;
+        }
+        _tprintf(TEXT("[ConTaxi] Ligação ao pipe da Central...\n"));
+        hPipe1 = CreateFile(sendMapTo_s_Pipe, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+        if (hPipe1 == NULL) {
+            _tprintf(TEXT("[ERRO] Ligar ao pipe '%s'! (CreateFile)\n"), sendMapTo_s_Pipe);
+            return 0;
+        }
     }
 
     _tprintf(TEXT("Criou pipe conexão do cliente...\n"));
@@ -172,7 +189,25 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
-
+    
+    hSemInstancias = CreateSemaphore(NULL, 1, 1, TEXT("SEM_SAPO_INSTANCIAS"));
+    DWORD dwError = GetLastError();
+    if (dwError == ERROR_ALREADY_EXISTS)
+    {
+        jogador.player_char = 's';
+        caracterUnic = 's';
+        jogador.mode = 1;
+    }
+    else {
+        jogador.player_char = 'S';
+        caracterUnic = 'S';
+    }
+    DWORD dwResult = WaitForSingleObject(hSemInstancias, 2000);
+    if (dwResult == WAIT_TIMEOUT)
+    {
+        MessageBox(NULL, TEXT("Entrada não autorizada"), TEXT("Erro"), MB_ICONERROR | MB_OK);
+        return 1;
+    }
     // Inicializar cadeias de caracteres globais
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_SAPOF, szWindowClass, MAX_LOADSTRING);
@@ -188,8 +223,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     //================================================================================================
 
     //hMapaLidoEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-    
-
     //==================================================================================================================
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_SAPOF));
@@ -206,6 +239,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
     }
 
+    //ReleaseSemaphore(hSemInstancias, 1, NULL);
+    // Fechar o semáforo
+    CloseHandle(hSemInstancias);
     // Fechar o Named Pipe antes de sair
     CloseHandle(hPipe);
     return (int) msg.wParam;
@@ -442,8 +478,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             {
             case VK_LEFT:
                 //MessageBox(hWnd, TEXT("Tecla esquerda pressionada"), TEXT("Tecla de Direção"), MB_OK);
-                jogador.move = 'L';
-                if (!WriteFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
+                jogador.move = _T('L');
+                if (!WriteFile(hPipeComand, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
                     MessageBox(NULL, _T("[ERRO] Erro na escrita (jogador.move)"), _T("Erro"), MB_ICONERROR | MB_OK);
                     exit(-4);
                 }
@@ -451,8 +487,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
             case VK_RIGHT:
                 //MessageBox(hWnd, TEXT("Tecla direita pressionada"), TEXT("Tecla de Direção"), MB_OK);
-                jogador.move = 'R';
-                if (!WriteFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
+                jogador.move = _T('R');
+                if (!WriteFile(hPipeComand, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
                     MessageBox(NULL, _T("[ERRO] Erro na escrita (jogador.move)"), _T("Erro"), MB_ICONERROR | MB_OK);
                     exit(-4);
                 }
@@ -460,8 +496,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
             case VK_UP:
                 //MessageBox(hWnd, TEXT("Tecla cima pressionada"), TEXT("Tecla de Direção"), MB_OK);
-                jogador.move = 'U';
-                if (!WriteFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
+                jogador.move = _T('U');
+                if (!WriteFile(hPipeComand, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
                     MessageBox(NULL, _T("[ERRO] Erro na escrita (jogador.move)"), _T("Erro"), MB_ICONERROR | MB_OK);
                     exit(-4);
                 }
@@ -469,8 +505,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
             case VK_DOWN:
                 //MessageBox(hWnd, TEXT("Tecla baixo pressionada"), TEXT("Tecla de Direção"), MB_OK);
-                jogador.move = 'D';
-                if (!WriteFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
+                jogador.move = _T('D');
+                if (!WriteFile(hPipeComand, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
                     MessageBox(NULL, _T("[ERRO] Erro na escrita (jogador.move)"), _T("Erro"), MB_ICONERROR | MB_OK);
                     exit(-4);
                 }
@@ -550,7 +586,19 @@ LRESULT CALLBACK DialogProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                 caracterUnic = jogador.player_char;
                 MessageBox(NULL, &caracterUnic, _T("LEU: "), MB_ICONQUESTION | MB_OK);
 
+                if (!WaitNamedPipe(receiveInputOf_S_Pipe, NMPWAIT_WAIT_FOREVER)) {
+                    MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") receiveInputOf_S_Pipe _T("! (WaitNamedPipe)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                    exit(-1);
+                }
 
+                MessageBox(NULL, _T("[LEITOR] Ligação input... (CreateFile)"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+                hPipeComand = CreateFile(receiveInputOf_S_Pipe, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
+                    FILE_ATTRIBUTE_NORMAL, NULL);
+                if (hPipeComand == NULL) {
+                    MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") receiveInputOf_S_Pipe _T("! (CreateFile)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                    exit(-1);
+                }
+                MessageBox(NULL, _T("[LEITOR] Liguei-me..."), _T("Leitor"), MB_ICONQUESTION | MB_OK);
                 ///*********************************************
                 
 
@@ -583,18 +631,6 @@ LRESULT CALLBACK DialogProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                         return 1;
                     }
                 }
-                else if (jogador.player_char == 's') {
-                    venceusEvent = CreateEvent(
-                        NULL,
-                        TRUE,
-                        FALSE,
-                        TEXT("VENCEU2_EVENTO_USER"));
-
-                    if (venceusEvent == NULL) {
-                        MessageBox(NULL, _T("[ERRO] Erro no CreateEvent (venceusEvent)"), _T("Erro"), MB_ICONERROR | MB_OK);
-                        return 1;
-                    }
-                }
                 
                 //InvalidateRect(hMainWindow, NULL, TRUE);
                 //UpdateWindow(hMainWindow);
@@ -607,8 +643,139 @@ LRESULT CALLBACK DialogProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
             
             break;
         case COMPETICAO_BUTTOM:
-            EnableWindow(hMainWindow, TRUE);
-            DestroyWindow(hWnd);
+            ReleaseSemaphore(hSemInstancias, 1, NULL);
+            GetWindowText(hName, nomeS, sizeof(nomeS) / sizeof(nomeS[0]));
+            if (_tcscmp(nomeS, TEXT("")))
+            {
+                MessageBox(NULL, nomeS, _T("NOME"), MB_ICONQUESTION | MB_OK);
+                if (caracterUnic != 's') {
+
+                    //coloca o modo escolhido no jogador
+                    if (!WaitNamedPipe(starterPipe, NMPWAIT_WAIT_FOREVER)) {
+                        MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") starterPipe _T("! (WaitNamedPipe)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                        exit(-1);
+                    }
+
+                    MessageBox(NULL, _T("[LEITOR] Ligação ao pipe do escritor... (CreateFile)"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+                    hPipe = CreateFile(starterPipe, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
+                        FILE_ATTRIBUTE_NORMAL, NULL);
+                    if (hPipe == NULL) {
+                        MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") starterPipe _T("! (CreateFile)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                        exit(-1);
+                    }
+                    MessageBox(NULL, _T("[LEITOR] Liguei-me..."), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+
+                    jogador.mode = 1;
+                    if (!WriteFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
+                        MessageBox(NULL, _T("[ERRO] Erro na escrita (jogador.mode)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                        exit(-2);
+                    }
+                    MessageBox(NULL, _T("[LEITOR] Escrita bem sucedida!"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+
+                    Sleep(1000);
+
+                    //Recebe o seu caracter unico
+                    if (!ReadFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
+                        MessageBox(NULL, _T("[ERRO] Erro na leitura (jogador.player_char)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                        exit(-2);
+                    }
+
+
+                    if (!WaitNamedPipe(receiveInputOf_S_Pipe, NMPWAIT_WAIT_FOREVER)) {
+                        MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") receiveInputOf_S_Pipe _T("! (WaitNamedPipe)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                        exit(-1);
+                    }
+
+                    MessageBox(NULL, _T("[LEITOR] Ligação input... (CreateFile)"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+                    hPipeComand = CreateFile(receiveInputOf_S_Pipe, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
+                        FILE_ATTRIBUTE_NORMAL, NULL);
+                    if (hPipeComand == NULL) {
+                        MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") receiveInputOf_S_Pipe _T("! (CreateFile)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                        exit(-1);
+                    }
+                    MessageBox(NULL, _T("[LEITOR] Liguei-me..."), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+                    ///*********************************************
+                }
+                else{
+
+                    if (!WaitNamedPipe(receiveInputOf_s_Pipe, NMPWAIT_WAIT_FOREVER)) {
+                        MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") receiveInputOf_s_Pipe _T("! (WaitNamedPipe)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                        exit(-1);
+                    }
+
+                    MessageBox(NULL, _T("[LEITOR] Ligação input... (CreateFile)"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+                    hPipeComand = CreateFile(receiveInputOf_s_Pipe, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
+                        FILE_ATTRIBUTE_NORMAL, NULL);
+                    if (hPipeComand == NULL) {
+                        MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") receiveInputOf_s_Pipe _T("! (CreateFile)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                        exit(-1);
+                    }
+                    MessageBox(NULL, _T("[LEITOR] Liguei-me..."), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+                    ///*********************************************
+
+                    comecouEvent = CreateEvent(
+                        NULL,
+                        TRUE,
+                        FALSE,
+                        TEXT("COMECOU_EVENTO_USER"));
+
+                    if (comecouEvent == NULL) {
+                        _tprintf(TEXT("Erro no CreateEvent\n"));
+                        return 1;
+                    }
+                    SetEvent(comecouEvent);
+                }
+                //caracterUnic = jogador.player_char;
+                //MessageBox(NULL, &caracterUnic, _T("LEU: "), MB_ICONQUESTION | MB_OK);
+
+
+                ///*********************************************
+
+
+                //SetEvent(hMapaLidoEvent);
+
+                EnableWindow(hMainWindow, TRUE);
+                DestroyWindow(hWnd);
+
+                hThreadAtualizaMapa = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ThreadAtualizaMapa, (LPVOID)&matrizMapa, 0, NULL);
+                if (hThreadAtualizaMapa == NULL) {
+                    _tprintf(TEXT("\n[ERRO] Erro ao lançar ThreadAtualizaMapa!\n"));
+                    return 0;
+                }
+
+                if (jogador.player_char == 'S') {
+                    venceuSEvent = CreateEvent(
+                        NULL,
+                        TRUE,
+                        FALSE,
+                        TEXT("VENCEU1_EVENTO_USER"));
+
+                    if (venceuSEvent == NULL) {
+                        MessageBox(NULL, _T("[ERRO] Erro no CreateEvent (venceuSEvent)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                        return 1;
+                    }
+                }
+                else if (jogador.player_char == 's') {
+                    venceusEvent = CreateEvent(
+                        NULL,
+                        TRUE,
+                        FALSE,
+                        TEXT("VENCEU2_EVENTO_USER"));
+
+                    if (venceusEvent == NULL) {
+                        MessageBox(NULL, _T("[ERRO] Erro no CreateEvent (venceusEvent)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                        return 1;
+                    }
+                }
+
+                //InvalidateRect(hMainWindow, NULL, TRUE);
+                //UpdateWindow(hMainWindow);
+
+            }
+            else
+            {
+                MessageBox(NULL, _T("Tem de preencher o nome!"), _T("[ERRO] - Nome"), MB_ICONERROR | MB_OK);
+            }
             break;
         default:
             break;
@@ -644,9 +811,15 @@ void displayDialog(HWND hWnd) {
 
     CreateWindow(TEXT("Static"), TEXT("Enter text here:"), WS_VISIBLE | WS_CHILD | SS_CENTER, 30, 110, 110, 20, hSecondWindow, NULL, NULL, NULL);
     hName = CreateWindow(TEXT("Edit"), NULL, WS_VISIBLE | WS_CHILD | WS_BORDER, 140, 110, 200, 20, hSecondWindow, NULL, NULL, NULL);
-    CreateWindow(TEXT("Static"), TEXT("Modalidade de jogo:"), WS_VISIBLE | WS_CHILD | SS_CENTER, 15, 160, 150, 20, hSecondWindow, NULL, NULL, NULL);
-    CreateWindow(TEXT("Button"), TEXT("Individual"), WS_VISIBLE | WS_CHILD, 165, 160, 100, 20, hSecondWindow, (HMENU)INDIVIDUAL_BUTTOM, NULL, NULL);
-    CreateWindow(TEXT("Button"), TEXT("Competição"), WS_VISIBLE | WS_CHILD, 265, 160, 100, 20, hSecondWindow, (HMENU)COMPETICAO_BUTTOM, NULL, NULL);
+
+    if (caracterUnic != 's') {
+        CreateWindow(TEXT("Static"), TEXT("Modalidade de jogo:"), WS_VISIBLE | WS_CHILD | SS_CENTER, 15, 160, 150, 20, hSecondWindow, NULL, NULL, NULL);
+        CreateWindow(TEXT("Button"), TEXT("Individual"), WS_VISIBLE | WS_CHILD, 165, 160, 100, 20, hSecondWindow, (HMENU)INDIVIDUAL_BUTTOM, NULL, NULL);
+        CreateWindow(TEXT("Button"), TEXT("Competição"), WS_VISIBLE | WS_CHILD, 265, 160, 100, 20, hSecondWindow, (HMENU)COMPETICAO_BUTTOM, NULL, NULL);
+    }
+    else
+
+        CreateWindow(TEXT("Button"), TEXT("Ok"), WS_VISIBLE | WS_CHILD, 225, 160, 100, 20, hSecondWindow, (HMENU)COMPETICAO_BUTTOM, NULL, NULL);
 
     EnableWindow(hWnd, FALSE);
 }
