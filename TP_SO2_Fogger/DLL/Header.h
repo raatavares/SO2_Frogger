@@ -19,6 +19,9 @@
 #define sendMapTo_S_Pipe TEXT("\\\\.\\pipe\\map_S")
 #define sendMapTo_s_Pipe TEXT("\\\\.\\pipe\\map_s")
 
+#define receiveInputOf_S_Pipe TEXT("\\\\.\\pipe\\input_S")
+#define receiveInputOf_s_Pipe TEXT("\\\\.\\pipe\\input_s")
+
 
 typedef struct {
 	HANDLE hEvent, hMutex;

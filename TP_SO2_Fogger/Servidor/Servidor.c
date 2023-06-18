@@ -28,6 +28,75 @@ BOOL putSapo(TCHAR** board, int numFaixas, int cols) {
     return TRUE;
 }
 
+
+DWORD WINAPI ThreadUserInput(LPVOID param) {
+    pipe_user_server* dados = (pipe_user_server*)param;
+    HANDLE hPipe[2];
+    
+
+    hPipe[0] = CreateNamedPipe(receiveInputOf_S_Pipe, PIPE_ACCESS_INBOUND, PIPE_WAIT |
+        PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE, 1,
+        sizeof(player), sizeof(player), 1000, NULL);
+    if (hPipe[0] == INVALID_HANDLE_VALUE) {
+        _tprintf(TEXT("[ERRO] Criar Named Pipe! (CreateNamedPipe)"));
+        exit(-1);
+    }
+
+    _tprintf(TEXT("Aguardando conexão do cliente...\n"));
+
+    if (!ConnectNamedPipe(hPipe[0], NULL)) {
+        _tprintf(TEXT("[ERRO] Ligação ao leitor! (ConnectNamedPipe)\n"));
+        exit(-1);
+    }
+
+    if (dados->players[0].mode == 1) {//multiplayer
+        hPipe[1] = CreateNamedPipe(receiveInputOf_s_Pipe, PIPE_ACCESS_INBOUND, PIPE_WAIT |
+            PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE, 1,
+            sizeof(player), sizeof(player), 1000, NULL);
+        if (hPipe[1] == INVALID_HANDLE_VALUE) {
+            _tprintf(TEXT("[ERRO] Criar Named Pipe! (CreateNamedPipe)"));
+            exit(-1);
+        }
+
+        _tprintf(TEXT("Aguardando conexão do cliente...\n"));
+
+        if (!ConnectNamedPipe(hPipe[1], NULL)) {
+            _tprintf(TEXT("[ERRO] Ligação ao leitor! (ConnectNamedPipe)\n"));
+            exit(-1);
+        }
+    }
+
+
+
+    DWORD bytesRead;
+    do
+    {
+        WaitForSingleObject(hMutexPipe, INFINITE);
+        if (!ReadFile(hPipe[0], (LPVOID)&dados->players[0], sizeof(dados->players[0]), &bytesRead, NULL)) {
+            //cliente 1
+            _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
+            exit(4);
+        }
+        if (dados->players[0].mode == 1) {//entra se multiplayer
+            if (!ReadFile(hPipe[1], (LPVOID)&dados->players[1], sizeof(dados->players[1]), &bytesRead, NULL)) {
+                //cliente 2
+                _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
+                exit(1);
+            }
+        }
+
+        /*
+        
+                        LOGICA
+
+        */
+        
+        
+        //Sleep(500);   se necessario
+    } while (1);//alterar para sair
+}
+
+
 DWORD WINAPI ThreadMapToUser(LPVOID param) {
     data* dados = (data*)((LPVOID*)param)[0];
     mapping* pDados = (mapping*)((LPVOID*)param)[1];
@@ -429,7 +498,7 @@ int _tmain(int argc, TCHAR* argv[]) {
     TCHAR par_nome[TAM] = TEXT("SOFTWARE\\Frogger\\velocidade");
     TCHAR command[TAM];
     DWORD par_valor;
-    HANDLE hRowThread[MAXFAIXAS], hUIThread, hMapThread, hBufferThread, hCriaSaposThread, hThreadMapToUsers;// THREADS
+    HANDLE hRowThread[MAXFAIXAS], hUIThread, hMapThread, hBufferThread, hCriaSaposThread, hThreadMapToUsers, hThreadUserInput;// THREADS
     HANDLE hPipe;//PIPES
     matriz matrizMap;
 
@@ -639,6 +708,8 @@ int _tmain(int argc, TCHAR* argv[]) {
     params[1] = &pDados;
     pDados.TERMINAR = 5;
     hThreadMapToUsers = CreateThread(NULL, 0, ThreadMapToUser, params, 0, NULL);
+    Sleep(500);
+    hThreadUserInput = CreateThread(NULL, 0, ThreadUserInput, &userServerData, 0, NULL);
     
 
 
