@@ -58,6 +58,9 @@ DWORD WINAPI TimeThread(LPVOID param) {
         {
             // Tempo chegou a zero, exibe a mensagem "Game Over"
             MessageBox(NULL, TEXT("Game Over"), TEXT("Tempo esgotado"), MB_OK);
+            SetEvent(gameOverEvent);
+            Sleep(500);
+            ResetEvent(gameOverEvent);
             break;
         }
     }
@@ -87,6 +90,17 @@ DWORD WINAPI ThreadAtualizaMapa(LPVOID param) {
     //SetEvent(matrizMapa.hMapaLidoEvent);
     //ResetEvent(matrizMapa.hMapaLidoEvent);
 
+    gameOverEvent = CreateEvent(
+        NULL,
+        TRUE,
+        FALSE,
+        TEXT("GAMEOVER_EVENTO_USER"));
+
+    if (gameOverEvent == NULL) {
+        MessageBox(NULL, _T("[ERRO] Erro no CreateEvent (gameOverEvent)"), _T("Erro"), MB_ICONERROR | MB_OK);
+        return 1;
+    }
+
     if (!WaitNamedPipe(sendMapTo_S_Pipe, NMPWAIT_WAIT_FOREVER)) {
         _tprintf(TEXT("[ERRO] Ligar ao pipe '%s'! (WaitNamedPipe)\n"), sendMapTo_S_Pipe);
         return 0;
@@ -99,7 +113,7 @@ DWORD WINAPI ThreadAtualizaMapa(LPVOID param) {
     }
 
     _tprintf(TEXT("Criou pipe conexão do cliente...\n"));
-
+    DWORD resultado;
 
     while (1) {
         WaitForSingleObject(hMutexPipe, INFINITE);
@@ -112,7 +126,21 @@ DWORD WINAPI ThreadAtualizaMapa(LPVOID param) {
                 MessageBox(NULL, _T("[ERRO] Erro na leitura (matriz)"), _T("Erro"), MB_ICONERROR | MB_OK);
                 exit(-2);
             }
-
+            if(jogador.player_char ==  'S') {
+                resultado = WaitForSingleObject(venceuSEvent, 0);
+            }
+            else {
+                resultado = WaitForSingleObject(venceusEvent, 0);
+            }
+            if (resultado == WAIT_OBJECT_0)
+            {
+                MessageBox(NULL, _T("Ganhou"), _T("Info"), MB_ICONERROR | MB_OK);
+            }
+            resultado = WaitForSingleObject(gameOverEvent, 0);
+            if (resultado == WAIT_OBJECT_0)
+            {
+                MessageBox(NULL, _T("Perdeu"), _T("Info"), MB_ICONERROR | MB_OK);
+            }
         }
 
         InvalidateRect(hMainWindow, NULL, FALSE);
@@ -531,7 +559,31 @@ LRESULT CALLBACK DialogProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                     return 0;
                 }
 
+                if (jogador.player_char == 'S') {
+                    venceuSEvent = CreateEvent(
+                        NULL,
+                        TRUE,
+                        FALSE,
+                        TEXT("VENCEU1_EVENTO_USER"));
 
+                    if (venceuSEvent == NULL) {
+                        MessageBox(NULL, _T("[ERRO] Erro no CreateEvent (venceuSEvent)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                        return 1;
+                    }
+                }
+                else if (jogador.player_char == 's') {
+                    venceusEvent = CreateEvent(
+                        NULL,
+                        TRUE,
+                        FALSE,
+                        TEXT("VENCEU2_EVENTO_USER"));
+
+                    if (venceusEvent == NULL) {
+                        MessageBox(NULL, _T("[ERRO] Erro no CreateEvent (venceusEvent)"), _T("Erro"), MB_ICONERROR | MB_OK);
+                        return 1;
+                    }
+                }
+                
                 //InvalidateRect(hMainWindow, NULL, TRUE);
                 //UpdateWindow(hMainWindow);
 

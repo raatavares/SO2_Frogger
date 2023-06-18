@@ -76,6 +76,9 @@ typedef struct {
 } pipe_user_server;
 
 HANDLE hMutexPipe;
+HANDLE gameOverEvent;
+HANDLE venceuSEvent;
+HANDLE venceusEvent;
 
 //Mapping BufferCircular
 HANDLE hFileBuffer;

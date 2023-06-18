@@ -32,7 +32,7 @@ BOOL putSapo(TCHAR** board, int numFaixas, int cols) {
 DWORD WINAPI ThreadUserInput(LPVOID param) {
     pipe_user_server* dados = (pipe_user_server*)param;
     HANDLE hPipe[2];
-    
+
 
     hPipe[0] = CreateNamedPipe(receiveInputOf_S_Pipe, PIPE_ACCESS_INBOUND, PIPE_WAIT |
         PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE, 1,
@@ -86,12 +86,12 @@ DWORD WINAPI ThreadUserInput(LPVOID param) {
         }
 
         /*
-        
+
                         LOGICA
 
         */
-        
-        
+
+
         //Sleep(500);   se necessario
     } while (1);//alterar para sair
 }
@@ -710,7 +710,7 @@ int _tmain(int argc, TCHAR* argv[]) {
     hThreadMapToUsers = CreateThread(NULL, 0, ThreadMapToUser, params, 0, NULL);
     Sleep(500);
     hThreadUserInput = CreateThread(NULL, 0, ThreadUserInput, &userServerData, 0, NULL);
-    
+
 
 
     //---------------------------
