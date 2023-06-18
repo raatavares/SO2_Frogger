@@ -14,7 +14,7 @@
 player jogador;
 pipe_user_server dadosMap;
 matriz* board;
-HANDLE hPipeComand;
+//HANDLE hPipeComand;
 
 matriz matrizMapa;
 
@@ -591,8 +591,8 @@ LRESULT CALLBACK DialogProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                     exit(-1);
                 }
 
-                MessageBox(NULL, _T("[LEITOR] Ligação input... (CreateFile)"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
-                hPipeComand = CreateFile(receiveInputOf_S_Pipe, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
+                MessageBox(NULL, _T("[LEITOR] Ligação inpute... (CreateFile)"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+                hPipeComand = CreateFile(receiveInputOf_S_Pipe, GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
                     FILE_ATTRIBUTE_NORMAL, NULL);
                 if (hPipeComand == NULL) {
                     MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") receiveInputOf_S_Pipe _T("! (CreateFile)"), _T("Erro"), MB_ICONERROR | MB_OK);

@@ -20,3 +20,4 @@ typedef struct {
 
 #define namepipe TEXT("\\\\.\\pipe\\sapo")
 HANDLE hPipe;
+HANDLE hPipeComand;

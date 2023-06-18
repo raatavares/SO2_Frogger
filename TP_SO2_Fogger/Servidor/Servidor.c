@@ -70,8 +70,8 @@ DWORD WINAPI ThreadUserInput(LPVOID param) {
     DWORD bytesRead;
     do
     {
-        resultado = WaitForSingleObject(hMutexPipe, 0);
-        if (resultado == WAIT_OBJECT_0) {
+       // resultado = WaitForSingleObject(hMutexPipe, 0);
+        //if (resultado == WAIT_OBJECT_0) {
             if (!ReadFile(hPipe[0], (LPVOID)&dados->players[0], sizeof(dados->players[0]), &bytesRead, NULL)) {
                 //cliente 1
                 _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
@@ -92,9 +92,9 @@ DWORD WINAPI ThreadUserInput(LPVOID param) {
                             LOGICA
 
             */
-        }
-        resultado = WaitForSingleObject(gameOverEvent, 0);
-        if (resultado == WAIT_OBJECT_0) { reinicializaBoard(dados->jogo->board, dados->jogo->rows, dados->jogo->cols); dados->jogo->command[0] = '\0'; }
+        //}
+        //resultado = WaitForSingleObject(gameOverEvent, 0);
+        //if (resultado == WAIT_OBJECT_0) { reinicializaBoard(dados->jogo->board, dados->jogo->rows, dados->jogo->cols); dados->jogo->command[0] = '\0'; }
 
         //Sleep(500);   se necessario
     } while (1);//alterar para sair
