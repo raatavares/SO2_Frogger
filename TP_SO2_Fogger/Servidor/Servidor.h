@@ -11,5 +11,6 @@
 BOOL putSapo(TCHAR** board, int numFaixas, int cols);
 
 void show(TCHAR** board, int numFaixas, int cols);
+void reinicializaBoard(TCHAR** areaJogo, int numFaixas, int cols);
 TCHAR** createBoard(int numFaixas, int cols);
 int gerarAleatorio(int minimo, int maximo); 

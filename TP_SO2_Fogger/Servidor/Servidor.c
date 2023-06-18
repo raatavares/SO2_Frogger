@@ -32,7 +32,7 @@ BOOL putSapo(TCHAR** board, int numFaixas, int cols) {
 DWORD WINAPI ThreadUserInput(LPVOID param) {
     pipe_user_server* dados = (pipe_user_server*)param;
     HANDLE hPipe[2];
-
+    DWORD resultado;
 
     hPipe[0] = CreateNamedPipe(receiveInputOf_S_Pipe, PIPE_ACCESS_INBOUND, PIPE_WAIT |
         PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE, 1,
@@ -67,30 +67,32 @@ DWORD WINAPI ThreadUserInput(LPVOID param) {
     }
 
 
-
     DWORD bytesRead;
     do
     {
-        WaitForSingleObject(hMutexPipe, INFINITE);
-        if (!ReadFile(hPipe[0], (LPVOID)&dados->players[0], sizeof(dados->players[0]), &bytesRead, NULL)) {
-            //cliente 1
-            _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
-            exit(4);
-        }
-        if (dados->players[0].mode == 1) {//entra se multiplayer
-            if (!ReadFile(hPipe[1], (LPVOID)&dados->players[1], sizeof(dados->players[1]), &bytesRead, NULL)) {
-                //cliente 2
+        resultado = WaitForSingleObject(hMutexPipe, 0);
+        if (resultado == WAIT_OBJECT_0) {
+            if (!ReadFile(hPipe[0], (LPVOID)&dados->players[0], sizeof(dados->players[0]), &bytesRead, NULL)) {
+                //cliente 1
                 _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
-                exit(1);
+                exit(4);
             }
+            if (dados->players[0].mode == 1) {//entra se multiplayer
+                if (!ReadFile(hPipe[1], (LPVOID)&dados->players[1], sizeof(dados->players[1]), &bytesRead, NULL)) {
+                    //cliente 2
+                    _tprintf(TEXT("[ERRO]Código de erro: %lu\n"), GetLastError());
+                    exit(1);
+                }
+            }
+
+            /*
+
+                            LOGICA
+
+            */
         }
-
-        /*
-
-                        LOGICA
-
-        */
-
+        resultado = WaitForSingleObject(gameOverEvent, 0);
+        if (resultado == WAIT_OBJECT_0) { reinicializaBoard(dados->jogo->board, dados->jogo->rows, dados->jogo->cols); dados->jogo->command[0] = '\0'; }
 
         //Sleep(500);   se necessario
     } while (1);//alterar para sair
@@ -220,6 +222,7 @@ DWORD WINAPI ThreadUI(LPVOID param) {
     TCHAR i;
     TCHAR* command;
     command = dados->command;
+    DWORD resultado;
 
     do {
         i = _gettch();
@@ -231,6 +234,7 @@ DWORD WINAPI ThreadUI(LPVOID param) {
         
         WaitForSingleObject(dados->hMutex, INFINITE);
         if (!_tcscmp(dados->command, TEXT("restart"))) { reinicializaBoard(dados->board, dados->rows, dados->cols);dados->command[0] = '\0'; }
+
         ReleaseMutex(dados->hMutex);
 
     } while (_tcscmp(dados->command, TEXT("sair")));
@@ -629,6 +633,17 @@ int _tmain(int argc, TCHAR* argv[]) {
     //------- sapos --------
     userServerData.jogo = pDados.jogo;
 
+    gameOverEvent = CreateEvent(
+        NULL,
+        TRUE,
+        FALSE,
+        TEXT("GAMEOVER_EVENTO_USER"));
+
+    if (gameOverEvent == NULL) {
+        _tprintf(TEXT("Erro no CreateEvent\n"));
+        return 1;
+    }
+
 
     hPipe = CreateNamedPipe(starterPipe, PIPE_ACCESS_DUPLEX, PIPE_WAIT |
         PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE, 1,
@@ -662,6 +677,17 @@ int _tmain(int argc, TCHAR* argv[]) {
     userServerData.players[0].player_char = _T('S');
     //userServerData.players[1].mode = userServerData.players[0].mode;
 
+    venceuSEvent = CreateEvent(
+        NULL,
+        TRUE,
+        FALSE,
+        TEXT("VENCEU1_EVENTO_USER"));
+
+    if (venceuSEvent == NULL) {
+        _tprintf(TEXT("Erro no CreateEvent\n"));
+        return 1;
+    }
+
     DWORD bytesWrite;
     if (WriteFile(hPipe, (LPVOID)&userServerData.players[0], sizeof(player), &bytesWrite, NULL)) {
         _tprintf(TEXT("Cliente atribuido com: 'S'\n"));
@@ -680,6 +706,17 @@ int _tmain(int argc, TCHAR* argv[]) {
         }
 
         _tprintf(TEXT("Cliente 2 conectado!\n"));
+
+        venceusEvent = CreateEvent(
+            NULL,
+            TRUE,
+            FALSE,
+            TEXT("VENCEU2_EVENTO_USER"));
+
+        if (venceusEvent == NULL) {
+            _tprintf(TEXT("Erro no CreateEvent\n"));
+            return 1;
+        }
 
         DWORD bytesRead;
         if (ReadFile(hPipe, &userServerData.players[1], sizeof(player), &bytesRead, NULL)) {

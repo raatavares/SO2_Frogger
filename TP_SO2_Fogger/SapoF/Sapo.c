@@ -114,6 +114,7 @@ DWORD WINAPI ThreadAtualizaMapa(LPVOID param) {
 
     _tprintf(TEXT("Criou pipe conexão do cliente...\n"));
     DWORD resultado;
+    int ganhou = 0, perdeu = 0;
 
     while (1) {
         WaitForSingleObject(hMutexPipe, INFINITE);
@@ -128,18 +129,29 @@ DWORD WINAPI ThreadAtualizaMapa(LPVOID param) {
             }
             if(jogador.player_char ==  'S') {
                 resultado = WaitForSingleObject(venceuSEvent, 0);
+                if (resultado == WAIT_OBJECT_0)
+                    ganhou = 1;
+                resultado = WaitForSingleObject(venceusEvent, 0);
+                if (resultado == WAIT_OBJECT_0)
+                    perdeu = 1;
             }
             else {
                 resultado = WaitForSingleObject(venceusEvent, 0);
+                if (resultado == WAIT_OBJECT_0)
+                    ganhou = 1;
+                resultado = WaitForSingleObject(venceuSEvent, 0);
+                if (resultado == WAIT_OBJECT_0)
+                    perdeu = 1;
             }
-            if (resultado == WAIT_OBJECT_0)
+            if (ganhou)
             {
                 MessageBox(NULL, _T("Ganhou"), _T("Info"), MB_ICONERROR | MB_OK);
+                ganhou = 0;
             }
-            resultado = WaitForSingleObject(gameOverEvent, 0);
-            if (resultado == WAIT_OBJECT_0)
+            else if (perdeu)
             {
                 MessageBox(NULL, _T("Perdeu"), _T("Info"), MB_ICONERROR | MB_OK);
+                perdeu = 0;
             }
         }
 
