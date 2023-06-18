@@ -109,7 +109,6 @@ DWORD WINAPI ThreadAtualizaMapa(LPVOID param) {
             //MessageBox(NULL, TEXT("[ERRO] Ligar ao pipe " +GetLastError() "! (WaitNamedPipe)"), _T("Erro"), MB_ICONERROR | MB_OK);
             return 0;
         }
-        _tprintf(TEXT("[ConTaxi] Ligação ao pipe da Central...\n"));
         hPipe1 = CreateFile(sendMapTo_S_Pipe, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
         if (hPipe1 == NULL) {
             _tprintf(TEXT("[ERRO] Ligar ao pipe '%s'! (CreateFile)\n"), sendMapTo_S_Pipe);
@@ -121,7 +120,6 @@ DWORD WINAPI ThreadAtualizaMapa(LPVOID param) {
             //MessageBox(NULL, TEXT("[ERRO] Ligar ao pipe " + GetLastError() "! (WaitNamedPipe)"), _T("Erro"), MB_ICONERROR | MB_OK);
             return 0;
         }
-        _tprintf(TEXT("[ConTaxi] Ligação ao pipe da Central...\n"));
         hPipe1 = CreateFile(sendMapTo_s_Pipe, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
         if (hPipe1 == NULL) {
             _tprintf(TEXT("[ERRO] Ligar ao pipe '%s'! (CreateFile)\n"), sendMapTo_s_Pipe);
@@ -550,7 +548,7 @@ LRESULT CALLBACK DialogProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
             GetWindowText(hName, nomeS, sizeof(nomeS) / sizeof(nomeS[0]));
             if (_tcscmp(nomeS, TEXT("")))
             {
-                MessageBox(NULL, nomeS, _T("NOME"), MB_ICONQUESTION | MB_OK);
+                //MessageBox(NULL, nomeS, _T("NOME"), MB_ICONQUESTION | MB_OK);
 
                 ///*********************************************
             
@@ -560,21 +558,21 @@ LRESULT CALLBACK DialogProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                     exit(-1);
                 }
 
-                MessageBox(NULL, _T("[LEITOR] Ligação ao pipe do escritor... (CreateFile)"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+                //MessageBox(NULL, _T("[LEITOR] Ligação ao pipe do escritor... (CreateFile)"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
                 hPipe = CreateFile(starterPipe, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
                     FILE_ATTRIBUTE_NORMAL, NULL);
                 if (hPipe == NULL) {
                     MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") starterPipe _T("! (CreateFile)"), _T("Erro"), MB_ICONERROR | MB_OK);
                     exit(-1);
                 }
-                MessageBox(NULL, _T("[LEITOR] Liguei-me..."), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+                //MessageBox(NULL, _T("[LEITOR] Liguei-me..."), _T("Leitor"), MB_ICONQUESTION | MB_OK);
 
                 jogador.mode = 0;
                 if (!WriteFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
                     MessageBox(NULL, _T("[ERRO] Erro na escrita (jogador.mode)"), _T("Erro"), MB_ICONERROR | MB_OK);
                     exit(-2);
                 }
-                MessageBox(NULL, _T("[LEITOR] Escrita bem sucedida!"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+                //MessageBox(NULL, _T("[LEITOR] Escrita bem sucedida!"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
 
                 Sleep(1000);
 
@@ -584,14 +582,15 @@ LRESULT CALLBACK DialogProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                     exit(-2);
                 }
                 caracterUnic = jogador.player_char;
-                MessageBox(NULL, &caracterUnic, _T("LEU: "), MB_ICONQUESTION | MB_OK);
+                //MessageBox(NULL, &caracterUnic, _T("LEU: "), MB_ICONQUESTION | MB_OK);
+                Sleep(4000);
 
                 if (!WaitNamedPipe(receiveInputOf_S_Pipe, NMPWAIT_WAIT_FOREVER)) {
                     MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") receiveInputOf_S_Pipe _T("! (WaitNamedPipe)"), _T("Erro"), MB_ICONERROR | MB_OK);
                     exit(-1);
                 }
 
-                MessageBox(NULL, _T("[LEITOR] Ligação inpute... (CreateFile)"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+                //MessageBox(NULL, _T("[LEITOR] Ligação inpute... (CreateFile)"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
                 hPipeComand = CreateFile(receiveInputOf_S_Pipe, GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
                     FILE_ATTRIBUTE_NORMAL, NULL);
                 if (hPipeComand == NULL) {
@@ -647,7 +646,7 @@ LRESULT CALLBACK DialogProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
             GetWindowText(hName, nomeS, sizeof(nomeS) / sizeof(nomeS[0]));
             if (_tcscmp(nomeS, TEXT("")))
             {
-                MessageBox(NULL, nomeS, _T("NOME"), MB_ICONQUESTION | MB_OK);
+                //MessageBox(NULL, nomeS, _T("NOME"), MB_ICONQUESTION | MB_OK);
                 if (caracterUnic != 's') {
 
                     //coloca o modo escolhido no jogador
@@ -656,21 +655,21 @@ LRESULT CALLBACK DialogProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                         exit(-1);
                     }
 
-                    MessageBox(NULL, _T("[LEITOR] Ligação ao pipe do escritor... (CreateFile)"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+                    //MessageBox(NULL, _T("[LEITOR] Ligação ao pipe do escritor... (CreateFile)"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
                     hPipe = CreateFile(starterPipe, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
                         FILE_ATTRIBUTE_NORMAL, NULL);
                     if (hPipe == NULL) {
                         MessageBox(NULL, _T("[ERRO] Ligar ao pipe ") starterPipe _T("! (CreateFile)"), _T("Erro"), MB_ICONERROR | MB_OK);
                         exit(-1);
                     }
-                    MessageBox(NULL, _T("[LEITOR] Liguei-me..."), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+                    //MessageBox(NULL, _T("[LEITOR] Liguei-me..."), _T("Leitor"), MB_ICONQUESTION | MB_OK);
 
                     jogador.mode = 1;
                     if (!WriteFile(hPipe, (LPVOID)&jogador, sizeof(jogador), &n, NULL)) {
                         MessageBox(NULL, _T("[ERRO] Erro na escrita (jogador.mode)"), _T("Erro"), MB_ICONERROR | MB_OK);
                         exit(-2);
                     }
-                    MessageBox(NULL, _T("[LEITOR] Escrita bem sucedida!"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+                    //MessageBox(NULL, _T("[LEITOR] Escrita bem sucedida!"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
 
                     Sleep(1000);
 
@@ -686,7 +685,7 @@ LRESULT CALLBACK DialogProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                         exit(-1);
                     }
 
-                    MessageBox(NULL, _T("[LEITOR] Ligação input... (CreateFile)"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
+                    //MessageBox(NULL, _T("[LEITOR] Ligação input... (CreateFile)"), _T("Leitor"), MB_ICONQUESTION | MB_OK);
                     hPipeComand = CreateFile(receiveInputOf_S_Pipe, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
                         FILE_ATTRIBUTE_NORMAL, NULL);
                     if (hPipeComand == NULL) {
